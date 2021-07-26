@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web3.Storage | Image gallery example</title>
+  </head>
+  <body>
+    <div id="app">
+      Hey there! Why not pick an image to upload to web3.storage?
+
+      <div id="inputs">
+        <label for="file-input">Select an image file</label>
+        <input type="file" id="file-input" accept=".jpeg,.jpg,.png,.gif,image/*" />
+
+        <img id="image-preview" />
+
+        <input id="caption-input" placeholder="Enter a caption"/>
+
+        <button id="upload-button" hidden="true">Do the thing</button>
+      </div>
+
+      <div id="progress">
+      </div>
+
+
+
+    </div>
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>

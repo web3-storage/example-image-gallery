@@ -1,0 +1,16 @@
+{
+  "name": "example-image-gallery",
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "devDependencies": {
+    "stylus": "^0.54.8",
+    "vite": "^2.4.3"
+  },
+  "dependencies": {
+    "web3.storage": "^3.0.0"
+  }
+}
