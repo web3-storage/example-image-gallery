@@ -164,7 +164,5 @@ function showLink (url) {
   output.appendChild(node)
 }
 
-// #endregion output helpers
-
 // call the setup function
 setup()
