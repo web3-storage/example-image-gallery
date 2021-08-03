@@ -1,10 +1,34 @@
+
+body {
+  font-size: 16px;
+  font-family: -apple-system, system-ui;
+  padding: 0;
+  margin: 0;
+}
+form {
+  width: 500px;
+  padding: 16px;
+  max-width: 100%;
+  display: block;
+  margin: 0 auto;
+  color:#333;
+}
+label {
+  display: block;
+  padding: 32px 0 8px;
+  font-weight: 700;
+}
+
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  position: fixed;
+  top: 0;
+  height: 80%;
+  width: 100%;
+  overflow-y: scroll;
 }
 
 #inputs {
@@ -14,4 +38,50 @@
 
 #image-preview {
   max-width: 800px;
+}
+
+#output {
+  display: block;
+  padding: 16px;
+  margin: 0;
+  color: lime;
+  background:#222;
+  font-family: Courier New, ui-monospace, monospace;
+  font-weight: 500;
+  line-height: 1.6;
+  position: fixed;
+  bottom: 0;
+  height: 20%;
+  width: 100%;
+  overflow-y: scroll;
+}
+
+#output a {
+  color: aqua
+}
+
+#drop-area {
+  border: 2px dashed #ccc;
+  border-radius: 20px;
+  width: 550px;
+  font-family: sans-serif;
+  margin: 100px auto;
+  padding: 20px;
+}
+
+#drop-area.highlight {
+  border-color: purple;
+}
+
+.select-button {
+  display: inline-block;
+  padding: 10px;
+  background: #ccc;
+  cursor: pointer;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  text-align: center;
+}
+.select-button:hover {
+  background: #ddd;
 }
