@@ -309,6 +309,8 @@ function setupTokenEntryUI() {
 ///////// Navigation
 ////////////////////////////////
 
+// #region navigation
+
 function navToPath(path) {
   if (window.location.pathname !== path) {
     window.location.pathname = path
@@ -326,6 +328,8 @@ function navToUpload() {
 function navToGallery() {
   navToPath('/gallery.html')
 }
+
+// #endregion navigation
 
 ////////////////////////////////
 ///////// Helper functions
