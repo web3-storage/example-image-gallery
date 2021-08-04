@@ -8,6 +8,12 @@
   </head>
   <body>
     <div id="app">
+      <div id="token-entry-ui" hidden="true">
+        <form id="token-form">
+          <label for="token-input">Enter an API token for Web3.Storage</label>
+          <input id="token-input" placeholder="eyJhb..." />
+        </form>
+      </div>
       <div id="upload-ui">
         <div id="drop-area">
           <form id="inputs">
@@ -25,8 +31,7 @@
           </form>
         </div>
       </div>
-      <div id="output">
-      </div>
+      <div id="output"></div>
     </div>
     <script type="module" src="/main.js"></script>
   </body>

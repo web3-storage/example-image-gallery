@@ -1,9 +1,6 @@
 import './style.css'
 import { Web3Storage } from 'web3.storage'
 
-const WEB3STORAGE_TOKEN = import.meta.env.VITE_WEB3STORAGE_TOKEN
-const web3storage = new Web3Storage({ token: WEB3STORAGE_TOKEN })
-
 const uploadUIContainer = document.getElementById('upload-ui')
 const galleryUIContainer = document.getElementById('gallery-ui')
 const previewImage = document.getElementById('image-preview')
@@ -12,6 +9,8 @@ const fileInput = document.getElementById('file-input')
 const dropArea = document.getElementById('drop-area')
 const captionInput = document.getElementById('caption-input') 
 const output = document.getElementById('output')
+const tokenUIContainer = document.getElementById('token-entry-ui')
+const tokenInput = document.getElementById('token-input')
 
 const namePrefix = 'ImageGallery'
 
@@ -21,6 +20,16 @@ const namePrefix = 'ImageGallery'
 ////////////////////////////////
 
 // #region web3storage-interactions
+
+function storageClient() {
+  const token = getSavedToken()
+  if (!token) {
+    // TODO: show token ui or surface error to user
+    return null
+  }
+
+  return new Web3Storage({ token })
+}
 
 /**
  * Stores an image file on Web3.Storage, along with a small metadata.json that includes a caption & filename.
@@ -40,7 +49,7 @@ async function storeImage(imageFile, caption) {
     caption
   })
 
-
+  const web3storage = storageClient()
   showMessage(`> 🤖 calculating content ID for ${imageFile.name}`)
   const cid = await web3storage.put([imageFile, metadataFile], {
     // the name is viewable at https://web3.storage/files and is included in the status and list API responses
@@ -71,6 +80,7 @@ async function storeImage(imageFile, caption) {
  */
  async function getGalleryListing() {
   const images = []
+  const web3storage = storageClient()
   for await (const upload of web3storage.list()) {
     if (!upload.name || !upload.name.startsWith(namePrefix)) {
       continue
@@ -269,6 +279,45 @@ function uploadClicked(evt) {
 
 // #endregion gallery-view
 
+////////////////////////////////////
+///////// Token input view
+////////////////////////////////////
+
+// #region token-view
+
+function setupTokenEntryUI() {
+  // don't show the token entry view if we have a saved token
+  // TODO: we should probably validate that the token works here
+  if (getSavedToken()) {
+    return
+  }
+
+  if (uploadUIContainer) {
+    uploadUIContainer.hidden = true
+  }
+  if (galleryUIContainer) {
+    galleryUIContainer.hidden = true
+  }
+
+  tokenUIContainer.hidden = false
+  tokenInput.onchange = evt => {
+    const token = evt.target.value
+    if (!token) {
+      return 
+    }
+    saveToken(token)
+    tokenUIContainer.hidden = true
+    if (uploadUIContainer) {
+      uploadUIContainer.hidden = false
+    }
+    if (galleryUIContainer) {
+      galleryUIContainer.hidden = false
+    }
+  }
+}
+
+// #endregion token-view
+
 ////////////////////////////////
 ///////// Helper functions
 ////////////////////////////////
@@ -304,6 +353,14 @@ function jsonFile(filename, obj) {
   return new File([JSON.stringify(obj)], filename)
 }
 
+function getSavedToken() {
+  return localStorage.getItem('w3storage-token')
+}
+
+function saveToken(token) {
+  localStorage.setItem('w3storage-token', token)
+}
+
 // #endregion helpers
 
 
@@ -317,6 +374,9 @@ function jsonFile(filename, obj) {
  * DOM initialization for all pages.
  */
 function setup() {
+  if (tokenUIContainer) {
+    setupTokenEntryUI()
+  }
   if (uploadUIContainer) {
     setupUploadUI()
   }
