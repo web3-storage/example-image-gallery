@@ -15,9 +15,7 @@ const output = document.getElementById('output')
 
 const galleryUIContainer = document.getElementById('gallery-ui')
 
-const listingLocalStorageKey = 'w3s-example-listing-cid'
-const listingUploadName = 'w3s-example-gallery-list.json'
-
+const namePrefix = 'ImageGallery'
 
 /**
  * Stores a file on Web3.Storage, using the provided caption as the upload name.
@@ -26,10 +24,18 @@ const listingUploadName = 'w3s-example-gallery-list.json'
  * @returns {object}
  */
 async function storeImage(imageFile, caption) {
+  const metadata = {
+    path: imageFile.name,
+    caption
+  }
+  const metadataFile = new File([JSON.stringify(metadata)], 'metadata.json')
+
+  const uploadName = [namePrefix, caption].join('|')
+
   console.log(`storing file ${imageFile.name}`)
-  const cid = await web3storage.put([imageFile], {
+  const cid = await web3storage.put([imageFile, metadataFile], {
     // the name is viewable at https://web3.storage/files and is included in the status and list API responses
-    name: caption,
+    name: uploadName,
 
     // onRootCidReady will be called as soon as we've calculated the Content ID locally, before uploading
     onRootCidReady: (localCid) => {
@@ -41,9 +47,11 @@ async function storeImage(imageFile, caption) {
     onStoredChunk: (bytes) => showMessage(`> 🛰 sent ${bytes.toLocaleString()} bytes to web3.storage`)
   })
 
-  const gatewayURL = `https://${cid}.ipfs.dweb.link/${imageFile.name}`
-  const uri = `ipfs://${cid}/${imageFile.name}`
-  return { cid, uri, gatewayURL }
+  const metadataGatewayURL = makeGatewayURL(cid, 'metadata.json')
+  const imageGatewayURL = makeGatewayURL(cid, imageFile.name)
+  const imageURI = `ipfs://${cid}/${imageFile.name}`
+  const metadataURI = `ipfs://${cid}/metadata.json`
+  return { cid, metadataGatewayURL, imageGatewayURL, imageURI, metadataURI }
 }
 
 /**
@@ -109,11 +117,13 @@ function uploadClicked(evt) {
   }
   
   const caption = captionInput.value || ''
-  storeImage(file, caption).then(({ cid, gatewayURL, uri }) => {
+  storeImage(file, caption).then(({ cid, imageGatewayURL, imageURI, metadataGatewayURL, metadataURI }) => {
     // TODO: do something with the cid (generate sharing link, etc)
     showMessage(`stored image with cid: ${cid}`)
-    showMessage(`ipfs uri: ${uri}`)
-    showLink(gatewayURL)
+    showMessage(`ipfs image uri: ${imageURI}`)
+    showLink(metadataGatewayURL)
+    showMessage(`ipfs metadata uri: ${metadataURI}`)
+    showLink(imageGatewayURL)
   })
 }
 
@@ -138,6 +148,9 @@ function showLink (url) {
   output.appendChild(node)
 }
 
+function makeGatewayURL(cid, path) {
+  return `https://${cid}.ipfs.dweb.link/${path}`
+}
 
 /**
  * DOM initialization for upload UI.
@@ -174,8 +187,33 @@ function showLink (url) {
 /**
  * DOM initialization for gallery view.
  */
-function setupGalleryUI() {
-  // TODO: wire up dom elements for gallery ui
+async function setupGalleryUI() {
+  const images = await getGalleryListing()
+  console.log('images:', images)
+
+  for (const image of images) {
+    const img = makeImageCard(image)
+    galleryUIContainer.appendChild(img)
+  }
+}
+
+/**
+ * Returns a DOM element for an image card in the gallery view.
+ * @param {object} metadata 
+ */
+function makeImageCard(metadata) {
+  const wrapper = document.createElement('div')
+  wrapper.className = 'gallery-image-card'
+
+  const imgEl = document.createElement('img')
+  imgEl.src = metadata.gatewayURL
+  imgEl.alt = metadata.caption
+
+  const label = document.createElement('span')
+  label.textContent = metadata.caption
+  wrapper.appendChild(imgEl)
+  wrapper.appendChild(label)
+  return wrapper
 }
 
 
@@ -183,59 +221,33 @@ function setupGalleryUI() {
  * Get a list of metadata objects for each image stored in the gallery.
  */
 async function getGalleryListing() {
-  let listingCID = localStorage.getItem(listingLocalStorageKey)
-  if (listingCID) {
-    try {
-      return getImageListByCID(listingCID)
-    } catch (e) {
-      console.error(`error getting listing using stored cid ${cid}: ${e.message}`)
-      localStorage.removeItem(listingLocalStorageKey)
-    }
-  }
-
-  listingCID = await findImageListCID()
-  if (!listingCID) {
-    console.log('no listing object found')
-    return []
-  }
-
-  return getImageListByCID(listingCID)
-}
-
-async function getImageListByCID(cid) {
-  const res = await web3storage.get(cid)
-  if (!res.ok) {
-    throw new Error(`error getting image listing (cid: ${cid}): [${res.status}] ${res.statusText}`)
-  }
-
-  const files = await res.files()
-  if (files.length < 1) {
-    throw new Error(`response for cid ${cid} did not contain any files`)
-  }
-
-  const jsonString = await files[0].text()
-  return JSON.parse(jsonString)
-}
-
-
-async function findImageListCID() {
-  console.log(`searching for most recent ${listingUploadName} upload`)
+  const images = []
   for await (const upload of web3storage.list()) {
-    if (upload.name !== listingUploadName) {
+    if (!upload.name || !upload.name.startsWith(namePrefix)) {
       continue
     }
-    return upload.cid
+    
+    try {
+      const metadata = await getImageMetadata(upload.cid)
+      const gatewayURL = makeGatewayURL(upload.cid, metadata.path)
+      images.push({...metadata, gatewayURL})
+    } catch (e) {
+      console.error('error getting image metadata:', e)
+      continue
+    }
   }
-  return null
+  
+  return images
 }
 
-async function storeImageList(list) {
-  const content = JSON.stringify(list)
-  const file = new File([content], 'list.json')
-  const cid = await web3storage.put([file], { name: listingUploadName })
 
-  localStorage.setItem(listingLocalStorageKey, cid)
-  return cid
+async function getImageMetadata(rootCID) {
+  const url = makeGatewayURL(rootCID, 'metadata.json')
+  const res = await fetch(url)
+  if (!res.ok) {
+    throw new Error(`error fetching image metadata: [${res.status}] ${res.statusText}`)
+  }
+  return res.json()
 }
 
 /**
@@ -250,13 +262,6 @@ function setup() {
   }
 
   // test code, rm plz
-  const list = [
-    {cid: 'bafybeiam6gyclz3a32y2m7u7rtp4roypuiyv42cbhgjayffgfbjfmnz5va', path: 'decentralized-space-invaders.gif', caption: 'pew! pew!!'}
-  ]
-  storeImageList(list).then(cid => {
-    console.log('image list cid:', cid)
-  })
-
   getGalleryListing().then(list => console.log(list))
 }
 
