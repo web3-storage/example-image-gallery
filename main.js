@@ -292,13 +292,6 @@ function setupTokenEntryUI() {
     return
   }
 
-  if (uploadUIContainer) {
-    uploadUIContainer.hidden = true
-  }
-  if (galleryUIContainer) {
-    galleryUIContainer.hidden = true
-  }
-
   tokenUIContainer.hidden = false
   tokenInput.onchange = evt => {
     const token = evt.target.value
@@ -306,17 +299,33 @@ function setupTokenEntryUI() {
       return 
     }
     saveToken(token)
-    tokenUIContainer.hidden = true
-    if (uploadUIContainer) {
-      uploadUIContainer.hidden = false
-    }
-    if (galleryUIContainer) {
-      galleryUIContainer.hidden = false
-    }
+    navToUpload()
   }
 }
 
 // #endregion token-view
+
+////////////////////////////////
+///////// Navigation
+////////////////////////////////
+
+function navToPath(path) {
+  if (window.location.pathname !== path) {
+    window.location.pathname = path
+  }
+}
+
+function navToSettings() {
+  navToPath('/settings.html')
+}
+
+function navToUpload() {
+  navToPath('/')
+}
+
+function navToGallery() {
+  navToPath('/gallery.html')
+}
 
 ////////////////////////////////
 ///////// Helper functions
@@ -382,6 +391,10 @@ function setup() {
   }
   if (galleryUIContainer) {
     setupGalleryUI()
+  }
+
+  if (!getSavedToken()) {
+    navToSettings()
   }
 }
 
