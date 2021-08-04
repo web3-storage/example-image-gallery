@@ -2,16 +2,22 @@ import './style.css'
 import { Web3Storage } from 'web3.storage'
 
 const WEB3STORAGE_TOKEN = import.meta.env.VITE_WEB3STORAGE_TOKEN
-const WEB3STORAGE_ENDPOINT = import.meta.env.DEV ? 'https://api-staging.web3.storage' : undefined
 
-const web3storage = new Web3Storage({ token: WEB3STORAGE_TOKEN, endpoint: WEB3STORAGE_ENDPOINT })
+const web3storage = new Web3Storage({ token: WEB3STORAGE_TOKEN })
 
+const uploadUIContainer = document.getElementById('upload-ui')
 const previewImage = document.getElementById('image-preview')
 const uploadButton = document.getElementById('upload-button')
 const fileInput = document.getElementById('file-input')
 const dropArea = document.getElementById('drop-area')
 const captionInput = document.getElementById('caption-input') 
 const output = document.getElementById('output')
+
+const galleryUIContainer = document.getElementById('gallery-ui')
+
+const listingLocalStorageKey = 'w3s-example-listing-cid'
+const listingUploadName = 'w3s-example-gallery-list.json'
+
 
 /**
  * Stores a file on Web3.Storage, using the provided caption as the upload name.
@@ -112,9 +118,31 @@ function uploadClicked(evt) {
 }
 
 /**
- * Some DOM initialization stuff.
+ * Display a message to the user in the output area.
+ * @param {string} text 
  */
-function setup() {
+function showMessage (text) {
+  const node = document.createElement('div')
+  node.innerText = text
+  output.appendChild(node)
+}
+
+/**
+ * Display a URL in the output area as a clickable link.
+ * @param {string} url 
+ */
+function showLink (url) {
+  const node = document.createElement('a')
+  node.href = url
+  node.innerText = `> 🔗 ${url}`
+  output.appendChild(node)
+}
+
+
+/**
+ * DOM initialization for upload UI.
+ */
+ function setupUploadUI() {
   // handle file selection changes
   fileInput.onchange = fileSelected
 
@@ -144,24 +172,92 @@ function setup() {
 }
 
 /**
- * Display a message to the user in the output area.
- * @param {string} text 
+ * DOM initialization for gallery view.
  */
-function showMessage (text) {
-  const node = document.createElement('div')
-  node.innerText = text
-  output.appendChild(node)
+function setupGalleryUI() {
+  // TODO: wire up dom elements for gallery ui
+}
+
+
+/**
+ * Get a list of metadata objects for each image stored in the gallery.
+ */
+async function getGalleryListing() {
+  let listingCID = localStorage.getItem(listingLocalStorageKey)
+  if (listingCID) {
+    try {
+      return getImageListByCID(listingCID)
+    } catch (e) {
+      console.error(`error getting listing using stored cid ${cid}: ${e.message}`)
+      localStorage.removeItem(listingLocalStorageKey)
+    }
+  }
+
+  listingCID = await findImageListCID()
+  if (!listingCID) {
+    console.log('no listing object found')
+    return []
+  }
+
+  return getImageListByCID(listingCID)
+}
+
+async function getImageListByCID(cid) {
+  const res = await web3storage.get(cid)
+  if (!res.ok) {
+    throw new Error(`error getting image listing (cid: ${cid}): [${res.status}] ${res.statusText}`)
+  }
+
+  const files = await res.files()
+  if (files.length < 1) {
+    throw new Error(`response for cid ${cid} did not contain any files`)
+  }
+
+  const jsonString = await files[0].text()
+  return JSON.parse(jsonString)
+}
+
+
+async function findImageListCID() {
+  console.log(`searching for most recent ${listingUploadName} upload`)
+  for await (const upload of web3storage.list()) {
+    if (upload.name !== listingUploadName) {
+      continue
+    }
+    return upload.cid
+  }
+  return null
+}
+
+async function storeImageList(list) {
+  const content = JSON.stringify(list)
+  const file = new File([content], 'list.json')
+  const cid = await web3storage.put([file], { name: listingUploadName })
+
+  localStorage.setItem(listingLocalStorageKey, cid)
+  return cid
 }
 
 /**
- * Display a URL in the output area as a clickable link.
- * @param {string} url 
+ * DOM initialization for all pages.
  */
-function showLink (url) {
-  const node = document.createElement('a')
-  node.href = url
-  node.innerText = `> 🔗 ${url}`
-  output.appendChild(node)
+function setup() {
+  if (uploadUIContainer) {
+    setupUploadUI()
+  }
+  if (galleryUIContainer) {
+    setupGalleryUI()
+  }
+
+  // test code, rm plz
+  const list = [
+    {cid: 'bafybeiam6gyclz3a32y2m7u7rtp4roypuiyv42cbhgjayffgfbjfmnz5va', path: 'decentralized-space-invaders.gif', caption: 'pew! pew!!'}
+  ]
+  storeImageList(list).then(cid => {
+    console.log('image list cid:', cid)
+  })
+
+  getGalleryListing().then(list => console.log(list))
 }
 
 // call the setup function
