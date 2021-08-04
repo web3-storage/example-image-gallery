@@ -85,3 +85,11 @@ label {
 .select-button:hover {
   background: #ddd;
 }
+
+.gallery-image-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #aaa;
+
+}

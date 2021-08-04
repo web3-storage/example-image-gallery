@@ -8,22 +8,23 @@
   </head>
   <body>
     <div id="app">
-      <div id="drop-area">
-        <form id="inputs">
+      <div id="upload-ui">
+        <div id="drop-area">
+          <form id="inputs">
 
-          <!-- The label for the hidden file input is styled as a button and can be clicked to select a file -->
-          <label class="select-button" for="file-input">Select an image file</label>
-          <input hidden="true" type="file" id="file-input" accept=".jpeg,.jpg,.png,.gif,image/*" />
+            <!-- The label for the hidden file input is styled as a button and can be clicked to select a file -->
+            <label class="select-button" for="file-input">Select an image file</label>
+            <input hidden="true" type="file" id="file-input" accept=".jpeg,.jpg,.png,.gif,image/*" />
 
-          <img id="image-preview" />
+            <img id="image-preview" />
 
-          <label for="caption-input">Enter a caption</label>
-          <input id="caption-input" placeholder="Enter a caption"/>
+            <label for="caption-input">Enter a caption</label>
+            <input id="caption-input" placeholder="Enter a caption"/>
 
-          <button id="upload-button" disabled="true">Do the thing</button>
-        </form>
+            <button id="upload-button" disabled="true">Do the thing</button>
+          </form>
+        </div>
       </div>
-
       <div id="output">
       </div>
     </div>
