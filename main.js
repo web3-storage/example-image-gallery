@@ -2,18 +2,16 @@ import './style.css'
 import { Web3Storage } from 'web3.storage'
 
 const WEB3STORAGE_TOKEN = import.meta.env.VITE_WEB3STORAGE_TOKEN
-
 const web3storage = new Web3Storage({ token: WEB3STORAGE_TOKEN })
 
 const uploadUIContainer = document.getElementById('upload-ui')
+const galleryUIContainer = document.getElementById('gallery-ui')
 const previewImage = document.getElementById('image-preview')
 const uploadButton = document.getElementById('upload-button')
 const fileInput = document.getElementById('file-input')
 const dropArea = document.getElementById('drop-area')
 const captionInput = document.getElementById('caption-input') 
 const output = document.getElementById('output')
-
-const galleryUIContainer = document.getElementById('gallery-ui')
 
 const namePrefix = 'ImageGallery'
 
@@ -101,7 +99,7 @@ async function storeImage(imageFile, caption) {
  * @property {string} gatewayURL an IPFS gateway url for the image
  * @property {string} uri an IPFS uri for the image
  * 
- * @returns {Promise<ImageMetadata>}
+ * @returns {Promise<ImageMetadata>} a promise that resolves to a metadata object for the image
  */
  async function getImageMetadata(cid) {
   const url = makeGatewayURL(cid, 'metadata.json')
