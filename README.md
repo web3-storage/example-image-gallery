@@ -10,14 +10,6 @@ Install dependencies:
 npm install
 ```
 
-Copy `env.local.example` to `.env.local`:
-
-```shell
-cp env.local.example .env.local
-```
-
-Edit `.env.local` and paste in your _staging_ API token from https://staging.web3.storage 
-
 Run the dev server:
 
 ```shell
@@ -25,5 +17,8 @@ npm run dev
 ```
 
 Open http://localhost:3000 in your browser.
+
+On the first run, you'll be redirected to http://localhost:3000/settings.html to paste in an API token. If you don't have a token yet, see the [Quickstart guide](https://docs.web3.storage/) to learn how to get one.
+The token is saved to your browser's local storage, so you should only need to do this once.
 
 <!-- TODO: explain how things work, etc. -->
