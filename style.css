@@ -1,4 +1,11 @@
 
+@import url(https://weloveiconfonts.com/api/?family=fontawesome);
+
+/* fontawesome */
+[class*="fontawesome-"]:before {
+  font-family: 'FontAwesome', sans-serif;
+}
+
 body {
   font-size: 16px;
   font-family: -apple-system, system-ui;

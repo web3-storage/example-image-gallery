@@ -285,21 +285,40 @@ function uploadClicked(evt) {
 
 // #region token-view
 
-function setupTokenEntryUI() {
-  // don't show the token entry view if we have a saved token
-  // TODO: we should probably validate that the token works here
-  if (getSavedToken()) {
-    return
-  }
-
-  tokenUIContainer.hidden = false
+function setupTokenUI() {
   tokenInput.onchange = evt => {
     const token = evt.target.value
     if (!token) {
       return 
     }
     saveToken(token)
-    navToUpload()
+    updateTokenUI()
+  }
+
+  const tokenDeleteButton = document.getElementById('token-delete-button')
+  if (tokenDeleteButton) {
+    tokenDeleteButton.onclick = evt => {
+      evt.preventDefault()
+      deleteSavedToken()
+      updateTokenUI()
+    }
+  }
+
+  updateTokenUI()
+}
+
+function updateTokenUI() {
+  const tokenEntrySection = document.getElementById('token-input-wrapper')
+  const savedTokenSection = document.getElementById('saved-token-wrapper')
+  const token = getSavedToken()
+  if (token) {
+    const savedTokenInput = document.getElementById('saved-token')
+    savedTokenInput.value = token
+    tokenEntrySection.hidden = true
+    savedTokenSection.hidden = false
+  } else {
+    tokenEntrySection.hidden = false
+    savedTokenSection.hidden = true
   }
 }
 
@@ -374,6 +393,10 @@ function saveToken(token) {
   localStorage.setItem('w3storage-token', token)
 }
 
+function deleteSavedToken() {
+  localStorage.removeItem('w3storage-token')
+}
+
 // #endregion helpers
 
 
@@ -388,7 +411,7 @@ function saveToken(token) {
  */
 function setup() {
   if (tokenUIContainer) {
-    setupTokenEntryUI()
+    setupTokenUI()
   }
   if (uploadUIContainer) {
     setupUploadUI()
