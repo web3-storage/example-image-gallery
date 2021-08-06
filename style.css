@@ -1,9 +1,18 @@
 
+@import url(https://weloveiconfonts.com/api/?family=fontawesome);
+
+/* fontawesome */
+[class*="fontawesome-"]:before {
+  font-family: 'FontAwesome', sans-serif;
+}
+
 body {
   font-size: 16px;
   font-family: -apple-system, system-ui;
   padding: 0;
   margin: 0;
+  display: flex;
+  flex-direction: column;
 }
 form {
   width: 500px;
@@ -24,14 +33,18 @@ label {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
-  position: fixed;
-  top: 0;
-  height: 80%;
-  width: 100%;
-  overflow-y: scroll;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
 }
 
 #inputs {
+  display: flex;
+  flex-direction: column;
+}
+
+#token-form {
   display: flex;
   flex-direction: column;
 }
@@ -41,17 +54,14 @@ label {
 }
 
 #output {
-  display: block;
   padding: 16px;
-  margin: 0;
+  margin-top: auto;
   color: lime;
   background:#222;
   font-family: Courier New, ui-monospace, monospace;
   font-weight: 500;
   line-height: 1.6;
-  position: fixed;
-  bottom: 0;
-  height: 20%;
+  height: 200px;
   width: 100%;
   overflow-y: scroll;
 }

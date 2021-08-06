@@ -1,19 +1,16 @@
 import './style.css'
 import { Web3Storage } from 'web3.storage'
 
-const WEB3STORAGE_TOKEN = import.meta.env.VITE_WEB3STORAGE_TOKEN
-
-const web3storage = new Web3Storage({ token: WEB3STORAGE_TOKEN })
-
 const uploadUIContainer = document.getElementById('upload-ui')
+const galleryUIContainer = document.getElementById('gallery-ui')
 const previewImage = document.getElementById('image-preview')
 const uploadButton = document.getElementById('upload-button')
 const fileInput = document.getElementById('file-input')
 const dropArea = document.getElementById('drop-area')
 const captionInput = document.getElementById('caption-input') 
 const output = document.getElementById('output')
-
-const galleryUIContainer = document.getElementById('gallery-ui')
+const tokenUIContainer = document.getElementById('token-entry-ui')
+const tokenInput = document.getElementById('token-input')
 
 const namePrefix = 'ImageGallery'
 
@@ -23,6 +20,16 @@ const namePrefix = 'ImageGallery'
 ////////////////////////////////
 
 // #region web3storage-interactions
+
+function storageClient() {
+  const token = getSavedToken()
+  if (!token) {
+    // TODO: show token ui or surface error to user
+    return null
+  }
+
+  return new Web3Storage({ token })
+}
 
 /**
  * Stores an image file on Web3.Storage, along with a small metadata.json that includes a caption & filename.
@@ -42,7 +49,7 @@ async function storeImage(imageFile, caption) {
     caption
   })
 
-
+  const web3storage = storageClient()
   showMessage(`> 🤖 calculating content ID for ${imageFile.name}`)
   const cid = await web3storage.put([imageFile, metadataFile], {
     // the name is viewable at https://web3.storage/files and is included in the status and list API responses
@@ -73,6 +80,7 @@ async function storeImage(imageFile, caption) {
  */
  async function getGalleryListing() {
   const images = []
+  const web3storage = storageClient()
   for await (const upload of web3storage.list()) {
     if (!upload.name || !upload.name.startsWith(namePrefix)) {
       continue
@@ -101,7 +109,7 @@ async function storeImage(imageFile, caption) {
  * @property {string} gatewayURL an IPFS gateway url for the image
  * @property {string} uri an IPFS uri for the image
  * 
- * @returns {Promise<ImageMetadata>}
+ * @returns {Promise<ImageMetadata>} a promise that resolves to a metadata object for the image
  */
  async function getImageMetadata(cid) {
   const url = makeGatewayURL(cid, 'metadata.json')
@@ -271,6 +279,77 @@ function uploadClicked(evt) {
 
 // #endregion gallery-view
 
+////////////////////////////////////
+///////// Token input view
+////////////////////////////////////
+
+// #region token-view
+
+function setupTokenUI() {
+  tokenInput.onchange = evt => {
+    const token = evt.target.value
+    if (!token) {
+      return 
+    }
+    saveToken(token)
+    updateTokenUI()
+  }
+
+  const tokenDeleteButton = document.getElementById('token-delete-button')
+  if (tokenDeleteButton) {
+    tokenDeleteButton.onclick = evt => {
+      evt.preventDefault()
+      deleteSavedToken()
+      updateTokenUI()
+    }
+  }
+
+  updateTokenUI()
+}
+
+function updateTokenUI() {
+  const tokenEntrySection = document.getElementById('token-input-wrapper')
+  const savedTokenSection = document.getElementById('saved-token-wrapper')
+  const token = getSavedToken()
+  if (token) {
+    const savedTokenInput = document.getElementById('saved-token')
+    savedTokenInput.value = token
+    tokenEntrySection.hidden = true
+    savedTokenSection.hidden = false
+  } else {
+    tokenEntrySection.hidden = false
+    savedTokenSection.hidden = true
+  }
+}
+
+// #endregion token-view
+
+////////////////////////////////
+///////// Navigation
+////////////////////////////////
+
+// #region navigation
+
+function navToPath(path) {
+  if (window.location.pathname !== path) {
+    window.location.pathname = path
+  }
+}
+
+function navToSettings() {
+  navToPath('/settings.html')
+}
+
+function navToUpload() {
+  navToPath('/')
+}
+
+function navToGallery() {
+  navToPath('/gallery.html')
+}
+
+// #endregion navigation
+
 ////////////////////////////////
 ///////// Helper functions
 ////////////////////////////////
@@ -306,6 +385,18 @@ function jsonFile(filename, obj) {
   return new File([JSON.stringify(obj)], filename)
 }
 
+function getSavedToken() {
+  return localStorage.getItem('w3storage-token')
+}
+
+function saveToken(token) {
+  localStorage.setItem('w3storage-token', token)
+}
+
+function deleteSavedToken() {
+  localStorage.removeItem('w3storage-token')
+}
+
 // #endregion helpers
 
 
@@ -319,11 +410,18 @@ function jsonFile(filename, obj) {
  * DOM initialization for all pages.
  */
 function setup() {
+  if (tokenUIContainer) {
+    setupTokenUI()
+  }
   if (uploadUIContainer) {
     setupUploadUI()
   }
   if (galleryUIContainer) {
     setupGalleryUI()
+  }
+
+  if (!getSavedToken()) {
+    navToSettings()
   }
 }
 

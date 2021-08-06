@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web3.Storage | Image gallery example</title>
+  </head>
+  <body>
+    <div id="app">
+      <div id="token-entry-ui">
+        <form id="token-form">
+          
+          <div id="token-input-wrapper">
+            <label for="token-input">Enter an API token for Web3.Storage</label>
+            <input id="token-input" placeholder="eyJhb..." />
+          </div>
+
+          <div id="saved-token-wrapper">
+            <label for="saved-token">Your API token</label>
+            <input id="saved-token" disabled="true" />
+
+            <button id="token-delete-button"><span class="fontawesome-trash"></span></button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>
