@@ -103,3 +103,7 @@ label {
   background-color: #aaa;
 
 }
+
+.nav-current-page {
+  color: #171691;
+}
