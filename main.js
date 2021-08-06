@@ -1,15 +1,12 @@
 import './style.css'
 import { Web3Storage } from 'web3.storage'
 
-const uploadUIContainer = document.getElementById('upload-ui')
-const galleryUIContainer = document.getElementById('gallery-ui')
 const previewImage = document.getElementById('image-preview')
 const uploadButton = document.getElementById('upload-button')
 const fileInput = document.getElementById('file-input')
 const dropArea = document.getElementById('drop-area')
-const captionInput = document.getElementById('caption-input') 
+const captionInput = document.getElementById('caption-input')
 const output = document.getElementById('output')
-const tokenUIContainer = document.getElementById('token-entry-ui')
 const tokenInput = document.getElementById('token-input')
 
 const namePrefix = 'ImageGallery'
@@ -78,14 +75,14 @@ async function storeImage(imageFile, caption) {
  * 
  * @returns {Promise<Array<ImageMetadata>>} a promise that resolves to an array of metadata objects.
  */
- async function getGalleryListing() {
+async function getGalleryListing() {
   const images = []
   const web3storage = storageClient()
   for await (const upload of web3storage.list()) {
     if (!upload.name || !upload.name.startsWith(namePrefix)) {
       continue
     }
-    
+
     try {
       const metadata = await getImageMetadata(upload.cid)
       images.push(metadata)
@@ -94,7 +91,7 @@ async function storeImage(imageFile, caption) {
       continue
     }
   }
-  
+
   return images
 }
 
@@ -111,7 +108,7 @@ async function storeImage(imageFile, caption) {
  * 
  * @returns {Promise<ImageMetadata>} a promise that resolves to a metadata object for the image
  */
- async function getImageMetadata(cid) {
+async function getImageMetadata(cid) {
   const url = makeGatewayURL(cid, 'metadata.json')
   const res = await fetch(url)
   if (!res.ok) {
@@ -120,7 +117,7 @@ async function storeImage(imageFile, caption) {
   const metadata = await res.json()
   const gatewayURL = makeGatewayURL(cid, metadata.path)
   const uri = `ipfs://${cid}/${metadata.path}`
-  return {...metadata, cid, gatewayURL, uri}
+  return { ...metadata, cid, gatewayURL, uri }
 }
 
 // #endregion web3storage-interactions
@@ -134,7 +131,11 @@ async function storeImage(imageFile, caption) {
 /**
  * DOM initialization for upload UI.
  */
- function setupUploadUI() {
+function setupUploadUI() {
+  if (!document.getElementById('upload-ui')) {
+    return
+  }
+
   // handle file selection changes
   fileInput.onchange = fileSelected
 
@@ -188,7 +189,7 @@ function fileSelected() {
  * Callback for 'drop' event that fires when user drops a file onto the drop-area div.
  * Note: currently doesn't check if the file is an image before accepting.
  */
- function fileDropped(evt) {
+function fileDropped(evt) {
   evt.preventDefault()
   fileInput.files = evt.dataTransfer.files
   const files = [...evt.dataTransfer.files]
@@ -225,7 +226,7 @@ function uploadClicked(evt) {
     console.log('no file selected')
     return
   }
-  
+
   const caption = captionInput.value || ''
   storeImage(file, caption).then(({ cid, imageGatewayURL, imageURI, metadataGatewayURL, metadataURI }) => {
     // TODO: do something with the cid (generate sharing link, etc)
@@ -248,7 +249,12 @@ function uploadClicked(evt) {
 /**
  * DOM initialization for gallery view.
  */
- async function setupGalleryUI() {
+async function setupGalleryUI() {
+  const galleryUIContainer = document.getElementById('gallery-ui')
+  if (!galleryUIContainer) {
+    return
+  }
+
   const images = await getGalleryListing()
   console.log('images:', images)
 
@@ -262,7 +268,7 @@ function uploadClicked(evt) {
  * Returns a DOM element for an image card in the gallery view.
  * @param {object} metadata 
  */
- function makeImageCard(metadata) {
+function makeImageCard(metadata) {
   const wrapper = document.createElement('div')
   wrapper.className = 'gallery-image-card'
 
@@ -304,10 +310,14 @@ function makeShareLink(url) {
 // #region token-view
 
 function setupTokenUI() {
+  if (!document.getElementById('token-ui')) {
+    return
+  }
+
   tokenInput.onchange = evt => {
     const token = evt.target.value
     if (!token) {
-      return 
+      return
     }
     saveToken(token)
     updateTokenUI()
@@ -378,7 +388,7 @@ function navToGallery() {
  * Display a message to the user in the output area.
  * @param {string} text 
  */
-function showMessage (text) {
+function showMessage(text) {
   const node = document.createElement('div')
   node.innerText = text
   output.appendChild(node)
@@ -388,7 +398,7 @@ function showMessage (text) {
  * Display a URL in the output area as a clickable link.
  * @param {string} url 
  */
-function showLink (url) {
+function showLink(url) {
   const node = document.createElement('a')
   node.href = url
   node.innerText = `> 🔗 ${url}`
@@ -428,15 +438,9 @@ function deleteSavedToken() {
  * DOM initialization for all pages.
  */
 function setup() {
-  if (tokenUIContainer) {
-    setupTokenUI()
-  }
-  if (uploadUIContainer) {
-    setupUploadUI()
-  }
-  if (galleryUIContainer) {
-    setupGalleryUI()
-  }
+  setupTokenUI()
+  setupUploadUI()
+  setupGalleryUI()
 
   if (!getSavedToken()) {
     navToSettings()
