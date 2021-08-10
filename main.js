@@ -272,9 +272,27 @@ function uploadClicked(evt) {
 
   const label = document.createElement('span')
   label.textContent = metadata.caption
+
+  const shareLink = makeShareLink(metadata.gatewayURL)
   wrapper.appendChild(imgEl)
   wrapper.appendChild(label)
+  wrapper.appendChild(shareLink)
   return wrapper
+}
+
+function makeShareLink(url) {
+  const div = document.createElement('div')
+  div.className = 'share-link-wrapper'
+
+  const a = document.createElement('a')
+  a.href = url
+  
+  const icon = document.createElement('span')
+  icon.className = 'fontawesome-share'
+
+  a.appendChild(icon)
+  div.appendChild(a)
+  return div
 }
 
 // #endregion gallery-view
