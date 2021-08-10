@@ -21,9 +21,17 @@ const namePrefix = 'ImageGallery'
 
 /**
  * Stores an image file on Web3.Storage, along with a small metadata.json that includes a caption & filename.
- * @param {File} imageFile
- * @param {string} caption 
- * @returns {object}
+ * @param {File} imageFile a File object containing image data
+ * @param {string} caption a string that describes the image
+ * 
+ * @typedef StoreImageResult
+ * @property {string} cid the Content ID for an directory containing the image and metadata
+ * @property {string} imageURI an ipfs:// URI for the image file
+ * @property {string} metadataURI an ipfs:// URI for the metadata file
+ * @property {string} imageGatewayURL an HTTP gateway URL for the image
+ * @property {string} metadataGatewayURL an HTTP gateway URL for the metadata file
+ * 
+ * @returns {Promise<StoreImageResult>} an object containing links to the uploaded content
  */
 async function storeImage(imageFile, caption) {
   // The name for our upload includes a prefix we can use to identify our files later
