@@ -188,7 +188,6 @@ function fileSelected(e) {
 
 /**
  * Callback for 'drop' event that fires when user drops a file onto the drop-area div.
- * Note: currently doesn't check if the file is an image before accepting.
  */
 function fileDropped(evt) {
   evt.preventDefault()
