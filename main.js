@@ -72,12 +72,11 @@ async function storeImage(imageFile, caption) {
 
 
 /**
- * Get a list containing metadata objects for each image stored in the gallery.
+ * Get metadata objects for each image stored in the gallery.
  * 
- * @returns {Promise<Array<ImageMetadata>>} a promise that resolves to an array of metadata objects.
+ * @returns {AsyncIterator<ImageMetadata>} an async iterator that will yield an ImageMetadata object for each stored image.
  */
-async function getGalleryListing() {
-  const images = []
+async function* listImageMetadata() {
   const web3storage = storageClient()
   for await (const upload of web3storage.list()) {
     if (!upload.name || !upload.name.startsWith(namePrefix)) {
@@ -86,14 +85,12 @@ async function getGalleryListing() {
 
     try {
       const metadata = await getImageMetadata(upload.cid)
-      images.push(metadata)
+      yield metadata
     } catch (e) {
       console.error('error getting image metadata:', e)
       continue
     }
   }
-
-  return images
 }
 
 /**
@@ -256,10 +253,8 @@ async function setupGalleryUI() {
     return
   }
 
-  const images = await getGalleryListing()
-  console.log('images:', images)
 
-  for (const image of images) {
+  for await (const image of listImageMetadata()) {
     const img = makeImageCard(image)
     const li = document.createElement('li')
     li.className = 'glide__slide'
