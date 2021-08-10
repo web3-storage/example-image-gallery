@@ -130,10 +130,32 @@ label {
   background: #ddd;
 }
 
+#gallery-ui {
+  color: #2c3e50;
+  height: 100%;
+}
+
 .gallery-image-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: #aaa;
+  justify-content: space-between;
+}
 
+.gallery-image-card img {
+  max-height: 600px;
+}
+
+.gallery-image-caption {
+  font-size: larger;
+  font-weight: bold;
+  padding: 10px;
+}
+
+.glide__arrow {
+  color: #2c3e50;
+}
+
+.share-link {
+  text-decoration: none;
 }

@@ -11,6 +11,7 @@
     "vite": "^2.4.3"
   },
   "dependencies": {
+    "@glidejs/glide": "^3.4.1",
     "web3.storage": "^3.1.0"
   }
 }

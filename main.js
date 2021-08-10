@@ -1,5 +1,6 @@
 import './style.css'
 import { Web3Storage } from 'web3.storage'
+import Glide from '@glidejs/glide'
 
 const previewImage = document.getElementById('image-preview')
 const uploadButton = document.getElementById('upload-button')
@@ -250,8 +251,8 @@ function uploadClicked(evt) {
  * DOM initialization for gallery view.
  */
 async function setupGalleryUI() {
-  const galleryUIContainer = document.getElementById('gallery-ui')
-  if (!galleryUIContainer) {
+  const slideContainer = document.getElementById('slide-container')
+  if (!slideContainer) {
     return
   }
 
@@ -260,8 +261,13 @@ async function setupGalleryUI() {
 
   for (const image of images) {
     const img = makeImageCard(image)
-    galleryUIContainer.appendChild(img)
+    const li = document.createElement('li')
+    li.className = 'glide__slide'
+    li.appendChild(img)
+    slideContainer.appendChild(li)
   }
+
+  new Glide('.glide').mount()
 }
 
 /**
@@ -277,6 +283,7 @@ function makeImageCard(metadata) {
   imgEl.alt = metadata.caption
 
   const label = document.createElement('span')
+  label.className = 'gallery-image-caption'
   label.textContent = metadata.caption
 
   const shareLink = makeShareLink(metadata.gatewayURL)
@@ -291,11 +298,16 @@ function makeShareLink(url) {
   div.className = 'share-link-wrapper'
 
   const a = document.createElement('a')
+  a.className = 'share-link'
   a.href = url
   
+  const label = document.createElement('span')
+  label.textContent = 'View on IPFS'
   const icon = document.createElement('span')
   icon.className = 'fontawesome-share'
+  icon.style = 'padding: 10px'
 
+  a.appendChild(label)
   a.appendChild(icon)
   div.appendChild(a)
   return div
