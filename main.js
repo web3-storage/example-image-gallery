@@ -248,6 +248,8 @@ function uploadClicked(evt) {
  * DOM initialization for gallery view.
  */
 async function setupGalleryUI() {
+  const carousel = document.getElementById('carousel')
+  const spinner = document.getElementById('carousel-spinner')
   const slideContainer = document.getElementById('slide-container')
   if (!slideContainer) {
     return
@@ -260,6 +262,9 @@ async function setupGalleryUI() {
     li.className = 'glide__slide'
     li.appendChild(img)
     slideContainer.appendChild(li)
+
+    carousel.hidden = false
+    spinner.hidden = true
   }
 
   new Glide('.glide').mount()

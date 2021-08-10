@@ -1,5 +1,6 @@
 
 @import url(https://weloveiconfonts.com/api/?family=fontawesome);
+@import 'spinner.css';
 
 /* fontawesome */
 [class*="fontawesome-"]:before {
@@ -159,3 +160,12 @@ label {
 .share-link {
   text-decoration: none;
 }
+
+#carousel-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
