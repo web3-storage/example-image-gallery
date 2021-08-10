@@ -1,5 +1,6 @@
 
 @import url(https://weloveiconfonts.com/api/?family=fontawesome);
+@import 'spinner.css';
 
 /* fontawesome */
 [class*="fontawesome-"]:before {
@@ -14,6 +15,35 @@ body {
   display: flex;
   flex-direction: column;
 }
+
+header {
+  height: 40px;
+  background-color: rgba(252,101,83,1);
+  display: flex;
+  align-items: center;
+  padding: 10px;
+}
+
+.spacer {
+  flex-grow: 1;
+}
+
+nav {
+  min-width: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+nav a {
+  color: rgba(23,22,145, 1);
+  text-decoration: none;
+}
+
+.nav-current-page {
+  color: white;
+}
+
 form {
   width: 500px;
   padding: 16px;
@@ -22,6 +52,11 @@ form {
   margin: 0 auto;
   color:#333;
 }
+
+input {
+  min-width: 90%;
+}
+
 label {
   display: block;
   padding: 32px 0 8px;
@@ -96,14 +131,41 @@ label {
   background: #ddd;
 }
 
+#gallery-ui {
+  color: #2c3e50;
+  height: 100%;
+}
+
 .gallery-image-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: #aaa;
-
+  justify-content: space-between;
 }
 
-.nav-current-page {
-  color: #171691;
+.gallery-image-card img {
+  max-height: 600px;
 }
+
+.gallery-image-caption {
+  font-size: larger;
+  font-weight: bold;
+  padding: 10px;
+}
+
+.glide__arrow {
+  color: #2c3e50;
+}
+
+.share-link {
+  text-decoration: none;
+}
+
+#carousel-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
