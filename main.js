@@ -128,6 +128,9 @@ async function getImageMetadata(cid) {
 
 // #region upload-view
 
+// keep track of currently selected file
+let selectedFile = null
+
 /**
  * DOM initialization for upload UI.
  */
@@ -164,25 +167,15 @@ function setupUploadUI() {
   dropArea.addEventListener('drop', fileDropped, false)
 }
 
-
-/**
- * Returns the currently selected file, or null if nothing has been selected.
- * @returns {File|null}
- */
-function getSelectedFile() {
-  if (fileInput.files.length < 1) {
-    console.log('nothing selected')
-    return null
-  }
-  return fileInput.files[0]
-}
-
 /**
  * Callback for file input onchange event, fired when the user makes a file selection.
  */
-function fileSelected() {
-  const file = getSelectedFile()
-  handleFileSelected(file)
+function fileSelected(e) {
+  if (e.target.files.length < 1) {
+    console.log('nothing selected')
+    return
+  }
+  handleFileSelected(e.target.files[0])
 }
 
 /**
@@ -191,10 +184,11 @@ function fileSelected() {
  */
 function fileDropped(evt) {
   evt.preventDefault()
-  fileInput.files = evt.dataTransfer.files
-  const files = [...evt.dataTransfer.files]
+  
+  // filter out any non-image files
+  const files = [...evt.dataTransfer.files].filter(f => f.type.includes('image'))
   if (files.length < 1) {
-    console.log('drop handler recieved no files, ignoring drop event')
+    console.log('drop handler recieved no image files, ignoring drop event')
     return
   }
   handleFileSelected(files[0])
@@ -205,6 +199,7 @@ function fileDropped(evt) {
  * Side effects: sets preview image to file content and sets upload button state to enabled.
  */
 function handleFileSelected(file) {
+  selectedFile = file
   if (file == null) {
     uploadButton.disabled = true
     return
@@ -221,14 +216,13 @@ function handleFileSelected(file) {
 function uploadClicked(evt) {
   evt.preventDefault()
   console.log('upload clicked')
-  const file = getSelectedFile()
-  if (file == null) {
+  if (selectedFile == null) {
     console.log('no file selected')
     return
   }
 
   const caption = captionInput.value || ''
-  storeImage(file, caption).then(({ cid, imageGatewayURL, imageURI, metadataGatewayURL, metadataURI }) => {
+  storeImage(selectedFile, caption).then(({ cid, imageGatewayURL, imageURI, metadataGatewayURL, metadataURI }) => {
     // TODO: do something with the cid (generate sharing link, etc)
     showMessage(`stored image with cid: ${cid}`)
     showMessage(`ipfs image uri: ${imageURI}`)
