@@ -10,24 +10,14 @@ const captionInput = document.getElementById('caption-input')
 const output = document.getElementById('output')
 const tokenInput = document.getElementById('token-input')
 
-const namePrefix = 'ImageGallery'
-
-
 ////////////////////////////////
 ////// Image upload & listing
 ////////////////////////////////
 
 // #region web3storage-interactions
 
-function storageClient() {
-  const token = getSavedToken()
-  if (!token) {
-    // TODO: show token ui or surface error to user
-    return null
-  }
-
-  return new Web3Storage({ token })
-}
+// We use this to identify our uploads in the client.list response.
+const namePrefix = 'ImageGallery'
 
 /**
  * Stores an image file on Web3.Storage, along with a small metadata.json that includes a caption & filename.
@@ -47,7 +37,13 @@ async function storeImage(imageFile, caption) {
     caption
   })
 
-  const web3storage = storageClient()
+  const token = getSavedToken()
+  if (!token) {
+    showMessage('> ❗️ no API token found for Web3.Storage. You can add one in the settings page!')
+    showLink(`${location.protocol}//${location.host}/settings.html`)
+    return
+  }
+  const web3storage = new Web3Storage({ token })
   showMessage(`> 🤖 calculating content ID for ${imageFile.name}`)
   const cid = await web3storage.put([imageFile, metadataFile], {
     // the name is viewable at https://web3.storage/files and is included in the status and list API responses
@@ -77,7 +73,13 @@ async function storeImage(imageFile, caption) {
  * @returns {AsyncIterator<ImageMetadata>} an async iterator that will yield an ImageMetadata object for each stored image.
  */
 async function* listImageMetadata() {
-  const web3storage = storageClient()
+  const token = getSavedToken()
+  if (!token) {
+    console.error('No API token for Web3.Storage found.')
+    return
+  }
+
+  const web3storage = new Web3Storage({ token })
   for await (const upload of web3storage.list()) {
     if (!upload.name || !upload.name.startsWith(namePrefix)) {
       continue
@@ -126,6 +128,9 @@ async function getImageMetadata(cid) {
 
 // #region upload-view
 
+// keep track of currently selected file
+let selectedFile = null
+
 /**
  * DOM initialization for upload UI.
  */
@@ -162,25 +167,15 @@ function setupUploadUI() {
   dropArea.addEventListener('drop', fileDropped, false)
 }
 
-
-/**
- * Returns the currently selected file, or null if nothing has been selected.
- * @returns {File|null}
- */
-function getSelectedFile() {
-  if (fileInput.files.length < 1) {
-    console.log('nothing selected')
-    return null
-  }
-  return fileInput.files[0]
-}
-
 /**
  * Callback for file input onchange event, fired when the user makes a file selection.
  */
-function fileSelected() {
-  const file = getSelectedFile()
-  handleFileSelected(file)
+function fileSelected(e) {
+  if (e.target.files.length < 1) {
+    console.log('nothing selected')
+    return
+  }
+  handleFileSelected(e.target.files[0])
 }
 
 /**
@@ -189,10 +184,11 @@ function fileSelected() {
  */
 function fileDropped(evt) {
   evt.preventDefault()
-  fileInput.files = evt.dataTransfer.files
-  const files = [...evt.dataTransfer.files]
+  
+  // filter out any non-image files
+  const files = [...evt.dataTransfer.files].filter(f => f.type.includes('image'))
   if (files.length < 1) {
-    console.log('drop handler recieved no files, ignoring drop event')
+    console.log('drop handler recieved no image files, ignoring drop event')
     return
   }
   handleFileSelected(files[0])
@@ -203,6 +199,7 @@ function fileDropped(evt) {
  * Side effects: sets preview image to file content and sets upload button state to enabled.
  */
 function handleFileSelected(file) {
+  selectedFile = file
   if (file == null) {
     uploadButton.disabled = true
     return
@@ -219,14 +216,13 @@ function handleFileSelected(file) {
 function uploadClicked(evt) {
   evt.preventDefault()
   console.log('upload clicked')
-  const file = getSelectedFile()
-  if (file == null) {
+  if (selectedFile == null) {
     console.log('no file selected')
     return
   }
 
   const caption = captionInput.value || ''
-  storeImage(file, caption).then(({ cid, imageGatewayURL, imageURI, metadataGatewayURL, metadataURI }) => {
+  storeImage(selectedFile, caption).then(({ cid, imageGatewayURL, imageURI, metadataGatewayURL, metadataURI }) => {
     // TODO: do something with the cid (generate sharing link, etc)
     showMessage(`stored image with cid: ${cid}`)
     showMessage(`ipfs image uri: ${imageURI}`)
@@ -234,6 +230,27 @@ function uploadClicked(evt) {
     showMessage(`ipfs metadata uri: ${metadataURI}`)
     showLink(imageGatewayURL)
   })
+}
+
+/**
+ * Display a message to the user in the output area.
+ * @param {string} text 
+ */
+ function showMessage(text) {
+  const node = document.createElement('div')
+  node.innerText = text
+  output.appendChild(node)
+}
+
+/**
+ * Display a URL in the output area as a clickable link.
+ * @param {string} url 
+ */
+function showLink(url) {
+  const node = document.createElement('a')
+  node.href = url
+  node.innerText = `> 🔗 ${url}`
+  output.appendChild(node)
 }
 
 // #endregion upload-view
@@ -285,7 +302,8 @@ async function setupGalleryUI() {
 
 /**
  * Returns a DOM element for an image card in the gallery view.
- * @param {object} metadata 
+ * @param {object} metadata
+ * @returns {HTMLDivElement}
  */
 function makeImageCard(metadata) {
   const wrapper = document.createElement('div')
@@ -306,10 +324,12 @@ function makeImageCard(metadata) {
   return wrapper
 }
 
+/**
+ * Makes a link to view the image via the IPFS gateway.
+ * @param {string} url 
+ * @returns {HTMLAnchorElement}
+ */
 function makeShareLink(url) {
-  const div = document.createElement('div')
-  div.className = 'share-link-wrapper'
-
   const a = document.createElement('a')
   a.className = 'share-link'
   a.href = url
@@ -322,8 +342,7 @@ function makeShareLink(url) {
 
   a.appendChild(label)
   a.appendChild(icon)
-  div.appendChild(a)
-  return div
+  return a
 }
 
 // #endregion gallery-view
@@ -334,6 +353,9 @@ function makeShareLink(url) {
 
 // #region token-view
 
+/**
+ * DOM initialization for token management UI.
+ */
 function setupTokenUI() {
   if (!document.getElementById('token-ui')) {
     return
@@ -360,6 +382,10 @@ function setupTokenUI() {
   updateTokenUI()
 }
 
+/**
+ * Update the token UI to show the input box if we don't have a saved token, 
+ * or the delete button if we do.
+ */
 function updateTokenUI() {
   const tokenEntrySection = document.getElementById('token-input-wrapper')
   const savedTokenSection = document.getElementById('saved-token-wrapper')
@@ -409,27 +435,6 @@ function navToGallery() {
 
 // #region helpers
 
-/**
- * Display a message to the user in the output area.
- * @param {string} text 
- */
-function showMessage(text) {
-  const node = document.createElement('div')
-  node.innerText = text
-  output.appendChild(node)
-}
-
-/**
- * Display a URL in the output area as a clickable link.
- * @param {string} url 
- */
-function showLink(url) {
-  const node = document.createElement('a')
-  node.href = url
-  node.innerText = `> 🔗 ${url}`
-  output.appendChild(node)
-}
-
 function makeGatewayURL(cid, path) {
   return `https://${cid}.ipfs.dweb.link/${path}`
 }
@@ -467,6 +472,7 @@ function setup() {
   setupUploadUI()
   setupGalleryUI()
 
+  // redirect to settings page if there's no API token in local storage
   if (!getSavedToken()) {
     navToSettings()
   }
