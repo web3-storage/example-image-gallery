@@ -255,7 +255,7 @@ async function setupGalleryUI() {
     return
   }
 
-
+  let numImages = 0
   for await (const image of listImageMetadata()) {
     const img = makeImageCard(image)
     const li = document.createElement('li')
@@ -263,10 +263,23 @@ async function setupGalleryUI() {
     li.appendChild(img)
     slideContainer.appendChild(li)
 
-    carousel.hidden = false
-    spinner.hidden = true
+    // show the carousel UI when we get the first image
+    if (numImages == 0) {
+      carousel.hidden = false
+      spinner.hidden = true
+    }
+    numImages += 1
   }
 
+  console.log(`loaded metadata for ${numImages} images`)
+  // If we don't have any images, show a message telling the user to upload something
+  if (numImages == 0) {
+    spinner.hidden = true
+    const noContentMessage = document.getElementById('no-content-message')
+    noContentMessage.hidden = false
+  }
+
+  // activate the carousel
   new Glide('.glide').mount()
 }
 

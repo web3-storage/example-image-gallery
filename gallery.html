@@ -26,11 +26,13 @@
 
         <div id="carousel-wrapper">
 
+          <!-- the loading spinner is hidden once an image loads -->
           <div id="carousel-spinner">
             <div class="lds-roller"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
           </div>
       
-          <div id="carousel" class="glide">
+          <!-- the carousel starts out hidden and is shown when the first image loads -->
+          <div id="carousel" class="glide" hidden="true">
             <div class="glide__track" data-glide-el="track">
               <ul class="glide__slides" id="slide-container">
                 <!-- carousel images will be added here with javascript -->
@@ -40,6 +42,12 @@
               <button class="glide__arrow glide__arrow--left" data-glide-dir="<">prev</button>
               <button class="glide__arrow glide__arrow--right" data-glide-dir=">">next</button>
             </div>
+          </div>
+
+          <div id="no-content-message" hidden="true">
+            It looks like you haven't stored anything yet.
+
+            <a href="/">Upload an image</a> to see it in the gallery.
           </div>
         </div>
       </div>
