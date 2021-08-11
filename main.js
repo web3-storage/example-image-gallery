@@ -1,4 +1,7 @@
+import '@glidejs/glide/dist/css/glide.core.min.css'
+import '@glidejs/glide/dist/css/glide.theme.min.css'
 import './style.css'
+
 import { Web3Storage } from 'web3.storage'
 import Glide from '@glidejs/glide'
 
