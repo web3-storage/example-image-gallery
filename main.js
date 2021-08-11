@@ -254,13 +254,10 @@ function uploadClicked(evt) {
  */
 function showInProgressUI() {
   const container = document.getElementById('upload-in-progress')
-  // the upload-in-progress element uses 'display: flex', which doesn't play well
-  // with the "hidden" attribute. Instead, we hide it by adding a "hidden" class
-  //  which sets 'display: none', and remove the class to show the element.
-  container.classList = ""
+  showElement(container)
 
   // hide the file upload UI
-  dropArea.hidden = true
+  hideElement(dropArea)
 }
 
 /**
@@ -313,8 +310,8 @@ async function setupGalleryUI() {
 
     // show the carousel UI when we get the first image
     if (numImages == 0) {
-      carousel.hidden = false
-      spinner.hidden = true
+      showElement(carousel)
+      hideElement(spinner)
     }
     numImages += 1
   }
@@ -322,9 +319,9 @@ async function setupGalleryUI() {
   console.log(`loaded metadata for ${numImages} images`)
   // If we don't have any images, show a message telling the user to upload something
   if (numImages == 0) {
-    spinner.hidden = true
+    hideElement(spinner)
     const noContentMessage = document.getElementById('no-content-message')
-    noContentMessage.hidden = false
+    showElement(noContentMessage)
   }
 
   // activate the carousel
@@ -424,11 +421,11 @@ function updateTokenUI() {
   if (token) {
     const savedTokenInput = document.getElementById('saved-token')
     savedTokenInput.value = token
-    tokenEntrySection.hidden = true
-    savedTokenSection.hidden = false
+    hideElement(tokenEntrySection)
+    showElement(savedTokenSection)
   } else {
-    tokenEntrySection.hidden = false
-    savedTokenSection.hidden = true
+    showElement(tokenEntrySection)
+    hideElement(savedTokenSection)
   }
 }
 
@@ -484,6 +481,14 @@ function saveToken(token) {
 
 function deleteSavedToken() {
   localStorage.removeItem('w3storage-token')
+}
+
+function hideElement(el) {
+  el.classList.add('hidden')
+}
+
+function showElement(el) {
+  el.classList.remove('hidden')
 }
 
 // #endregion helpers

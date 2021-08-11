@@ -7,6 +7,10 @@
   font-family: 'FontAwesome', sans-serif;
 }
 
+.hidden {
+  display: none;
+}
+
 body {
   font-size: 16px;
   font-family: -apple-system, system-ui;
