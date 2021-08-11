@@ -54,20 +54,47 @@ The contents of the `dist` folder can be copied to any static web host, or even 
 
 To view the compiled site on your local computer, you'll need to run a basic web server - just opening the `.html` files in your browser won't work, since it will block the request to load the javascript files thanks to CORS policies.
 
-Here's a simple way to get a server running if you have `python3` installed:
+You can run a simple static HTTP server to preview the build output by running:
 
 ```shell
-cd dist
-python3 -m http.server
+npm run serve
 ```
 
-You should see something like:
+You should see something like this:
 
 ```
-Serving HTTP on :: port 8000 (http://[::]:8000/) ...
+> example-image-gallery@0.0.0 serve
+> vite preview
+
+
+  vite v2.4.3 build preview server running at:
+
+  > Local: http://localhost:5000/
+  > Network: use `--host` to expose
 ```
 
-Opening http://localhost:8000 should then take you to the site.
+Opening http://localhost:5000 should then take you to the site.
+
+### Deploying to Web3.Storage
+
+You can upload the compiled site directly to Web3.Storage by running:
+
+```shell
+export WEB3STORAGE_TOKEN="your-API-token"
+npm run deploy
+```
+
+You'll need to replace `your-API-token` with an API token from Web3.Storage.
+
+The [deploy script](./scripts/deploy.js) will output something similar to this:
+
+```
+Loading site files...
+Uploading 10 files to Web3.Storage...
+Deployed to Web3.Storage!
+Root cid:  bafybeifl6l3b4s7hpdm4d32vkh3gwi3cuta7owap3gooxfbrqhp7olx6m4
+Gateway url: https://bafybeifl6l3b4s7hpdm4d32vkh3gwi3cuta7owap3gooxfbrqhp7olx6m4.ipfs.dweb.link
+```
 
 ## Code Overview
 

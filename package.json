@@ -4,7 +4,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "deploy": "npm run build && node scripts/deploy.js"
   },
   "devDependencies": {
     "stylus": "^0.54.8",
