@@ -211,8 +211,16 @@ function handleFileSelected(file) {
     uploadButton.disabled = true
     return
   }
-  previewImage.src = URL.createObjectURL(file)
+  updatePreviewImages(file)
   uploadButton.disabled = false
+}
+
+function updatePreviewImages(imageFile) {
+  const elements = document.querySelectorAll('img.preview-image')
+  const url = URL.createObjectURL(imageFile)
+  for (const img of elements) {
+    img.src = url
+  }
 }
 
 /**
@@ -222,11 +230,13 @@ function handleFileSelected(file) {
  */
 function uploadClicked(evt) {
   evt.preventDefault()
-  console.log('upload clicked')
   if (selectedFile == null) {
     console.log('no file selected')
     return
   }
+
+  // switch to "upload in progress" view
+  showInProgressUI()
 
   const caption = captionInput.value || ''
   storeImage(selectedFile, caption).then(({ cid, imageGatewayURL, imageURI, metadataGatewayURL, metadataURI }) => {
@@ -237,6 +247,20 @@ function uploadClicked(evt) {
     showMessage(`ipfs metadata uri: ${metadataURI}`)
     showLink(imageGatewayURL)
   })
+}
+
+/**
+ * Hides the file upload view and shows an "upload in progress" view.
+ */
+function showInProgressUI() {
+  const container = document.getElementById('upload-in-progress')
+  // the upload-in-progress element uses 'display: flex', which doesn't play well
+  // with the "hidden" attribute. Instead, we hide it by adding a "hidden" class
+  //  which sets 'display: none', and remove the class to show the element.
+  container.classList = ""
+
+  // hide the file upload UI
+  dropArea.hidden = true
 }
 
 /**

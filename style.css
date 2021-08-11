@@ -84,9 +84,21 @@ label {
   flex-direction: column;
 }
 
-#image-preview {
+.preview-image {
   max-width: 800px;
 }
+
+
+#upload-in-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#upload-in-progress.hidden {
+  display: none;
+}
+
 
 #output {
   padding: 16px;
@@ -96,7 +108,7 @@ label {
   font-family: Courier New, ui-monospace, monospace;
   font-weight: 500;
   line-height: 1.6;
-  height: 200px;
+  min-height: 200px;
   width: 100%;
   overflow-y: scroll;
 }
