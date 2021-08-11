@@ -21,6 +21,54 @@ Open http://localhost:3000 in your browser.
 On the first run, you'll be redirected to http://localhost:3000/settings.html to paste in an API token. If you don't have a token yet, see the [Quickstart guide](https://docs.web3.storage/) to learn how to get one.
 The token is saved to your browser's local storage, so you should only need to do this once.
 
+### Building for production
+
+The commands above will run a development server that supports fancy features like hot-reloading when you change the code. This is provided by [Vite.js](https://vitejs.dev), which also bundles up the site for a production deployment.
+
+If you want to deploy the site somewhere, you can run
+
+```shell
+npm run build
+```
+
+This will create a `dist` folder with the compiled site. It will look something like this:
+
+```
+dist
+├── assets
+│   ├── favicon.17e50649.svg
+│   ├── gallery.c6431f3b.js
+│   ├── main.af36d20e.js
+│   ├── main.b06b9f34.js
+│   ├── main.b26a67ee.css
+│   ├── settings.ad3ba2b6.js
+│   └── vendor.061fb27f.js
+├── gallery.html
+├── index.html
+└── settings.html
+```
+
+The contents of the `dist` folder can be copied to any static web host, or even published to IPFS and Filecoin using Web3.Storage.
+
+<!-- TODO: write script to deploy to web3.storage & show how to use it -->
+
+To view the compiled site on your local computer, you'll need to run a basic web server - just opening the `.html` files in your browser won't work, since it will block the request to load the javascript files thanks to CORS policies.
+
+Here's a simple way to get a server running if you have `python3` installed:
+
+```shell
+cd dist
+python3 -m http.server
+```
+
+You should see something like:
+
+```
+Serving HTTP on :: port 8000 (http://[::]:8000/) ...
+```
+
+Opening http://localhost:8000 should then take you to the site.
+
 ## Code Overview
 
 This example project is written in "vanilla" JavaScript, HTML and CSS, so there's no UI framework like React or Vue in the mix, just good old `document.getElementById` and friends.
