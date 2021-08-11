@@ -22,12 +22,11 @@
       <div id="upload-ui">
         <div id="drop-area">
           <form id="inputs">
-
             <!-- The label for the hidden file input is styled as a button and can be clicked to select a file -->
             <label class="select-button" for="file-input">Select an image file</label>
-            <input hidden="true" type="file" id="file-input" accept=".jpeg,.jpg,.png,.gif,image/*" />
+            <input class="hidden" type="file" id="file-input" accept=".jpeg,.jpg,.png,.gif,image/*" />
 
-            <img id="image-preview" />
+            <img id="image-preview" class="preview-image" />
 
             <label for="caption-input">Enter a caption</label>
             <input id="caption-input" placeholder="Enter a caption"/>
@@ -35,8 +34,16 @@
             <button id="upload-button" disabled="true">Upload to Web3.Storage</button>
           </form>
         </div>
+
+        <div id="upload-in-progress" class="hidden" >
+          <h3>Uploading to Web3.Storage...</h3>
+          <img id="uploading-preview-image" class="preview-image" />
+          <div>
+            <span id="uploading-caption"></span>
+          </div>
+          <div id="output"></div>
+        </div>
       </div>
-      <div id="output"></div>
     </div>
     <script type="module" src="/main.js"></script>
   </body>

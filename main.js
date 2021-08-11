@@ -21,9 +21,17 @@ const namePrefix = 'ImageGallery'
 
 /**
  * Stores an image file on Web3.Storage, along with a small metadata.json that includes a caption & filename.
- * @param {File} imageFile
- * @param {string} caption 
- * @returns {object}
+ * @param {File} imageFile a File object containing image data
+ * @param {string} caption a string that describes the image
+ * 
+ * @typedef StoreImageResult
+ * @property {string} cid the Content ID for an directory containing the image and metadata
+ * @property {string} imageURI an ipfs:// URI for the image file
+ * @property {string} metadataURI an ipfs:// URI for the metadata file
+ * @property {string} imageGatewayURL an HTTP gateway URL for the image
+ * @property {string} metadataGatewayURL an HTTP gateway URL for the metadata file
+ * 
+ * @returns {Promise<StoreImageResult>} an object containing links to the uploaded content
  */
 async function storeImage(imageFile, caption) {
   // The name for our upload includes a prefix we can use to identify our files later
@@ -180,7 +188,6 @@ function fileSelected(e) {
 
 /**
  * Callback for 'drop' event that fires when user drops a file onto the drop-area div.
- * Note: currently doesn't check if the file is an image before accepting.
  */
 function fileDropped(evt) {
   evt.preventDefault()
@@ -204,8 +211,16 @@ function handleFileSelected(file) {
     uploadButton.disabled = true
     return
   }
-  previewImage.src = URL.createObjectURL(file)
+  updatePreviewImages(file)
   uploadButton.disabled = false
+}
+
+function updatePreviewImages(imageFile) {
+  const elements = document.querySelectorAll('img.preview-image')
+  const url = URL.createObjectURL(imageFile)
+  for (const img of elements) {
+    img.src = url
+  }
 }
 
 /**
@@ -215,11 +230,13 @@ function handleFileSelected(file) {
  */
 function uploadClicked(evt) {
   evt.preventDefault()
-  console.log('upload clicked')
   if (selectedFile == null) {
     console.log('no file selected')
     return
   }
+
+  // switch to "upload in progress" view
+  showInProgressUI()
 
   const caption = captionInput.value || ''
   storeImage(selectedFile, caption).then(({ cid, imageGatewayURL, imageURI, metadataGatewayURL, metadataURI }) => {
@@ -230,6 +247,17 @@ function uploadClicked(evt) {
     showMessage(`ipfs metadata uri: ${metadataURI}`)
     showLink(imageGatewayURL)
   })
+}
+
+/**
+ * Hides the file upload view and shows an "upload in progress" view.
+ */
+function showInProgressUI() {
+  const container = document.getElementById('upload-in-progress')
+  showElement(container)
+
+  // hide the file upload UI
+  hideElement(dropArea)
 }
 
 /**
@@ -282,8 +310,8 @@ async function setupGalleryUI() {
 
     // show the carousel UI when we get the first image
     if (numImages == 0) {
-      carousel.hidden = false
-      spinner.hidden = true
+      showElement(carousel)
+      hideElement(spinner)
     }
     numImages += 1
   }
@@ -291,9 +319,9 @@ async function setupGalleryUI() {
   console.log(`loaded metadata for ${numImages} images`)
   // If we don't have any images, show a message telling the user to upload something
   if (numImages == 0) {
-    spinner.hidden = true
+    hideElement(spinner)
     const noContentMessage = document.getElementById('no-content-message')
-    noContentMessage.hidden = false
+    showElement(noContentMessage)
   }
 
   // activate the carousel
@@ -393,11 +421,11 @@ function updateTokenUI() {
   if (token) {
     const savedTokenInput = document.getElementById('saved-token')
     savedTokenInput.value = token
-    tokenEntrySection.hidden = true
-    savedTokenSection.hidden = false
+    hideElement(tokenEntrySection)
+    showElement(savedTokenSection)
   } else {
-    tokenEntrySection.hidden = false
-    savedTokenSection.hidden = true
+    showElement(tokenEntrySection)
+    hideElement(savedTokenSection)
   }
 }
 
@@ -453,6 +481,14 @@ function saveToken(token) {
 
 function deleteSavedToken() {
   localStorage.removeItem('w3storage-token')
+}
+
+function hideElement(el) {
+  el.classList.add('hidden')
+}
+
+function showElement(el) {
+  el.classList.remove('hidden')
 }
 
 // #endregion helpers
