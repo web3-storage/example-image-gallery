@@ -126,8 +126,8 @@ label {
 #output {
   padding: 16px;
   margin-top: auto;
-  color: lime;
-  background:#222;
+  /* color: lime;
+  background:#222; */
   font-family: Courier New, ui-monospace, monospace;
   font-weight: 500;
   line-height: 1.6;
@@ -136,9 +136,7 @@ label {
   overflow-y: scroll;
 }
 
-#output a {
-  color: aqua
-}
+
 
 #drop-area {
   border: 2px dashed #ccc;
