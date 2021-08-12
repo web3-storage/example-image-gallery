@@ -131,6 +131,17 @@ async function getImageMetadata(cid) {
   return { ...metadata, cid, gatewayURL, uri }
 }
 
+async function isTokenValid(token) {
+  const web3storage = new Web3Storage({ token })
+  // cid for an empty IPFS directory
+  const testCID = 'bafybeiczsscdsbs7ffqz55asqdf3smv6klcw3gofszvwlyarci47bgf354'
+  const res = await web3storage.status(testCID)
+  if (res.status === 401 || res.status === 403) {
+    return false
+  }
+  return true
+}
+
 // #endregion web3storage-interactions
 
 ////////////////////////////////
@@ -415,14 +426,8 @@ function makeShareLink(url) {
   a.className = 'share-link'
   a.href = url
   
-  const label = document.createElement('span')
-  label.textContent = 'View on IPFS'
-  const icon = document.createElement('span')
-  icon.className = 'fontawesome-share'
-  icon.style = 'padding: 10px'
-
+  const label = iconLabel('fontawesome-share', 'View on IPFS')
   a.appendChild(label)
-  a.appendChild(icon)
   return a
 }
 
@@ -433,15 +438,21 @@ function makeClipboardButton(url) {
     copyStringToClipboard(url)
   }
 
-  const label = document.createElement('span')
-  label.textContent = 'Copy sharing link'
-  const icon = document.createElement('span')
-  icon.className = 'fontawesome-paste'
-  icon.style = 'padding: 10px'
-
+  const label = iconLabel('fontawesome-paste', 'Copy sharing link')
   button.appendChild(label)
-  button.appendChild(icon)
   return button
+}
+
+function iconLabel(iconClass, labelText) {
+  const label = document.createElement('span')
+  label.textContent = labelText
+  const icon = document.createElement('span')
+  icon.className = iconClass
+  icon.style = 'padding: 10px'
+  const div = document.createElement('div')
+  div.appendChild(icon)
+  div.appendChild(label)
+  return div
 }
 
 // #endregion gallery-view
