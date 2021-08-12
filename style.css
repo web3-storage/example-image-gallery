@@ -87,10 +87,11 @@ label {
   -moz-osx-font-smoothing: grayscale;
   display: flex;
   flex-direction: column;
-  align-items: center;
   height: 100vh;
   width: 100vw;
 }
+
+
 
 #welcome-message {
   max-width: 600px;
@@ -112,6 +113,11 @@ label {
   max-width: 800px;
 }
 
+#upload-ui {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
 #upload-in-progress {
   display: flex;
