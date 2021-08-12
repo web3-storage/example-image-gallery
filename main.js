@@ -331,7 +331,8 @@ async function setupGalleryUI() {
 
   // activate the carousel
   const glide = new Glide('.glide', {
-    type: 'carousel'
+    type: 'carousel',
+    gap: 800,
   })
   
   glide.mount()
