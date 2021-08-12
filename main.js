@@ -305,36 +305,48 @@ async function setupGalleryUI() {
     return
   }
 
-  let numImages = 0
+  const slideCIDs = []
+  let selectedSlide = 0
+  let i = 0
   for await (const image of listImageMetadata()) {
+    slideCIDs[i] = image.cid
     const img = makeImageCard(image)
     const li = document.createElement('li')
     li.className = 'glide__slide'
     li.appendChild(img)
     slideContainer.appendChild(li)
 
-    // show the carousel UI when we get the first image
-    if (numImages == 0) {
-      showElement(carousel)
-      hideElement(spinner)
+    // if we have a location hash that matches this image's CID, start the carousel here
+    if (image.cid === getLocationHash()) {
+      selectedSlide = i
     }
-    numImages += 1
+
+    i += 1
   }
 
-  console.log(`loaded metadata for ${numImages} images`)
+  console.log(`loaded metadata for ${i} images`)
   // If we don't have any images, show a message telling the user to upload something
-  if (numImages == 0) {
+  if (i == 0) {
     hideElement(spinner)
     const noContentMessage = document.getElementById('no-content-message')
     showElement(noContentMessage)
+  } else {
+    showElement(carousel)
+    hideElement(spinner)
   }
 
-  // activate the carousel
+  // make the carousel component
   const glide = new Glide('.glide', {
     type: 'carousel',
     gap: 800,
+    startAt: selectedSlide,
   })
-  
+
+  // after moving to a new slide, update the location hash with the matching CID
+  glide.on('move.after', () => {
+    setLocationHash(slideCIDs[glide.index])
+  })
+
   glide.mount()
 }
 
@@ -499,6 +511,14 @@ function hideElement(el) {
 
 function showElement(el) {
   el.classList.remove('hidden')
+}
+
+function getLocationHash() {
+  return location.hash.substring(1)
+}
+
+function setLocationHash(value) {
+  location.hash = '#' + value
 }
 
 // #endregion helpers
