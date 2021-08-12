@@ -7,6 +7,7 @@
   font-family: 'FontAwesome', sans-serif;
 }
 
+/* apply to hide an element, remove to show */
 .hidden {
   display: none;
 }
@@ -74,13 +75,21 @@ label {
   color: #2c3e50;
   display: flex;
   flex-direction: column;
+  align-items: center;
   height: 100vh;
   width: 100vw;
+}
+
+#welcome-message {
+  max-width: 600px;
+  margin-top: 40px;
+  margin-bottom: 40px;
 }
 
 #inputs {
   display: flex;
   flex-direction: column;
+  min-height: 600px;
 }
 
 #token-form {
@@ -126,7 +135,6 @@ label {
   border-radius: 20px;
   width: 550px;
   font-family: sans-serif;
-  margin: 100px auto;
   padding: 20px;
 }
 
@@ -145,6 +153,12 @@ label {
 }
 .select-button:hover {
   background: #ddd;
+}
+
+#upload-button {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 10px;
 }
 
 #gallery-ui {
