@@ -409,6 +409,7 @@ function makeImageCard(metadata) {
  */
 function makeShareLink(url) {
   const a = document.createElement('a')
+  a.target = '_external'
   a.className = 'share-link'
   a.href = url
   
