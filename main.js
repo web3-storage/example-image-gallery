@@ -281,6 +281,7 @@ function showInProgressUI() {
 function showLink(url) {
   const node = document.createElement('a')
   node.href = url
+  node.target = '_external'
   node.innerText = `> 🔗 ${url}`
   output.appendChild(node)
 }
