@@ -330,7 +330,11 @@ async function setupGalleryUI() {
   }
 
   // activate the carousel
-  new Glide('.glide').mount()
+  const glide = new Glide('.glide', {
+    type: 'carousel'
+  })
+  
+  glide.mount()
 }
 
 /**
