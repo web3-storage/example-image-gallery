@@ -2,6 +2,11 @@
 @import url(https://weloveiconfonts.com/api/?family=fontawesome);
 @import 'spinner.css';
 
+
+/************************************
+ * Shared between pages
+ ************************************/
+
 :root {
   --main-accent-color: rgba(252,101,83,1);
   --link-color: rgba(23,22,145, 1);
@@ -91,7 +96,9 @@ label {
   width: 100vw;
 }
 
-
+/************************************
+ * Upload page
+ ************************************/
 
 #welcome-message {
   max-width: 600px;
@@ -104,14 +111,6 @@ label {
   min-height: 600px;
 }
 
-#token-form {
-  display: flex;
-  flex-direction: column;
-}
-
-.preview-image {
-  max-width: 800px;
-}
 
 #upload-ui {
   display: flex;
@@ -129,12 +128,20 @@ label {
   display: none;
 }
 
+#upload-success {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+}
+
+#upload-success.hidden {
+  display: none;
+}
 
 #output {
   padding: 16px;
   margin-top: auto;
-  /* color: lime;
-  background:#222; */
   font-family: Courier New, ui-monospace, monospace;
   font-weight: 500;
   line-height: 1.6;
@@ -142,7 +149,6 @@ label {
   width: 100%;
   overflow-y: scroll;
 }
-
 
 #drop-area {
   border: 2px dashed #ccc;
@@ -176,6 +182,19 @@ label {
   padding: 10px;
 }
 
+.preview-image {
+  max-height: 60vh;
+  max-width: 800px;
+}
+
+#success-links {
+  margin: 30px;
+}
+
+/************************************
+ * Gallery page
+ ************************************/
+
 #gallery-ui {
   color: #2c3e50;
   height: 100%;
@@ -190,6 +209,7 @@ label {
 
 .gallery-image-card img {
   max-height: 600px;
+  max-width: 90%;
 }
 
 .gallery-image-caption {
@@ -215,3 +235,11 @@ label {
   height: 100%;
 }
 
+/************************************
+ * Settings page
+ ************************************/
+
+#token-form {
+  display: flex;
+  flex-direction: column;
+}

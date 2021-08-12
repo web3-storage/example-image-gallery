@@ -150,6 +150,8 @@ function setupUploadUI() {
     return
   }
 
+  showUploadInputs()
+
   // handle file selection changes
   fileInput.onchange = fileSelected
 
@@ -242,14 +244,15 @@ function uploadClicked(evt) {
   showInProgressUI()
 
   const caption = captionInput.value || ''
-  storeImage(selectedFile, caption).then(({ cid, imageGatewayURL, imageURI, metadataGatewayURL, metadataURI }) => {
-    // TODO: do something with the cid (generate sharing link, etc)
-    showMessage(`stored image with cid: ${cid}`)
-    showMessage(`ipfs image uri: ${imageURI}`)
-    showLink(metadataGatewayURL)
-    showMessage(`ipfs metadata uri: ${metadataURI}`)
-    showLink(imageGatewayURL)
-  })
+  storeImage(selectedFile, caption)
+    .then(showSuccessView)
+}
+
+function showUploadInputs() {
+  const inputArea = document.getElementById('upload-input-area')
+  showElement(inputArea)
+  hideInProgressView()
+  hideSuccessView()
 }
 
 /**
@@ -258,10 +261,35 @@ function uploadClicked(evt) {
 function showInProgressUI() {
   const inProgress = document.getElementById('upload-in-progress')
   showElement(inProgress)
+  hideUploadInputs()
+}
 
-  // hide the file upload UI
+function showSuccessView(uploadResult) {
+  hideInProgressView()
+
+  const galleryLink = document.getElementById('success-gallery-link')
+  galleryLink.href = `./gallery.html#${uploadResult.cid}`
+
+  const gatewayLink = document.getElementById('success-gateway-link')
+  gatewayLink.href = uploadResult.imageGatewayURL
+
+  const successView = document.getElementById('upload-success')
+  showElement(successView)
+}
+
+function hideUploadInputs() {
   const inputArea = document.getElementById('upload-input-area')
   hideElement(inputArea)
+}
+
+function hideInProgressView() {
+  const inProgress = document.getElementById('upload-in-progress')
+  hideElement(inProgress)
+}
+
+function hideSuccessView() {
+  const successView = document.getElementById('upload-success')
+  hideElement(successView)
 }
 
 /**
