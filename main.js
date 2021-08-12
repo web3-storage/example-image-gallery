@@ -256,11 +256,12 @@ function uploadClicked(evt) {
  * Hides the file upload view and shows an "upload in progress" view.
  */
 function showInProgressUI() {
-  const container = document.getElementById('upload-in-progress')
-  showElement(container)
+  const inProgress = document.getElementById('upload-in-progress')
+  showElement(inProgress)
 
   // hide the file upload UI
-  hideElement(dropArea)
+  const inputArea = document.getElementById('upload-input-area')
+  hideElement(inputArea)
 }
 
 /**

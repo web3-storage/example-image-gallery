@@ -2,6 +2,14 @@
 @import url(https://weloveiconfonts.com/api/?family=fontawesome);
 @import 'spinner.css';
 
+:root {
+  --main-accent-color: rgba(252,101,83,1);
+  --link-color: rgba(23,22,145, 1);
+  --curent-page-nav-highlight-color: white;
+  --main-text-color: #2c3e50;
+  --page-bg-color: rgba(255,242,236,1);
+}
+
 /* fontawesome */
 [class*="fontawesome-"]:before {
   font-family: 'FontAwesome', sans-serif;
@@ -17,15 +25,18 @@ body {
   font-family: -apple-system, system-ui;
   padding: 0;
   margin: 0;
-  display: flex;
-  flex-direction: column;
+
+  color: var(--main-text-color);
+  background-color: var(--page-bg-color);
 }
 
 header {
-  height: 40px;
-  background-color: rgba(252,101,83,1);
+  min-width: 100vw;
+  background-color: var(--main-accent-color);
   display: flex;
+  justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
   padding: 10px;
 }
 
@@ -34,28 +45,29 @@ header {
 }
 
 nav {
-  min-width: 400px;
+  min-width: 240px;
   display: flex;
   align-items: center;
   justify-content: space-around;
 }
 
+a {
+  color: var(--link-color);
+}
+
 nav a {
-  color: rgba(23,22,145, 1);
   text-decoration: none;
 }
 
 .nav-current-page {
-  color: white;
+  color: var(--curent-page-nav-highlight-color);
 }
 
 form {
-  width: 500px;
+  max-width: 500px;
   padding: 16px;
-  max-width: 100%;
   display: block;
   margin: 0 auto;
-  color:#333;
 }
 
 input {
@@ -72,7 +84,6 @@ label {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -82,8 +93,7 @@ label {
 
 #welcome-message {
   max-width: 600px;
-  margin-top: 40px;
-  margin-bottom: 40px;
+  margin: 40px;
 }
 
 #inputs {
@@ -133,13 +143,14 @@ label {
 #drop-area {
   border: 2px dashed #ccc;
   border-radius: 20px;
-  width: 550px;
+  max-width: 550px;
   font-family: sans-serif;
   padding: 20px;
+  margin: 40px;
 }
 
 #drop-area.highlight {
-  border-color: purple;
+  border-color: var(--main-accent-color);
 }
 
 .select-button {
