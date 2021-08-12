@@ -5,7 +5,6 @@ import './style.css'
 import { Web3Storage } from 'web3.storage'
 import Glide from '@glidejs/glide'
 
-const previewImage = document.getElementById('image-preview')
 const uploadButton = document.getElementById('upload-button')
 const fileInput = document.getElementById('file-input')
 const dropArea = document.getElementById('drop-area')
@@ -127,6 +126,7 @@ async function getImageMetadata(cid) {
   }
   const metadata = await res.json()
   const gatewayURL = makeGatewayURL(cid, metadata.path)
+  console.log('gateway url', gatewayURL)
   const uri = `ipfs://${cid}/${metadata.path}`
   return { ...metadata, cid, gatewayURL, uri }
 }
@@ -396,9 +396,11 @@ function makeImageCard(metadata) {
   label.textContent = metadata.caption
 
   const shareLink = makeShareLink(metadata.gatewayURL)
+  const copyButton = makeClipboardButton(metadata.gatewayURL)
   wrapper.appendChild(imgEl)
   wrapper.appendChild(label)
   wrapper.appendChild(shareLink)
+  wrapper.appendChild(copyButton)
   return wrapper
 }
 
@@ -422,6 +424,24 @@ function makeShareLink(url) {
   a.appendChild(label)
   a.appendChild(icon)
   return a
+}
+
+function makeClipboardButton(url) {
+  const button = document.createElement('button')
+  button.onclick = e => {
+    e.preventDefault()
+    copyStringToClipboard(url)
+  }
+
+  const label = document.createElement('span')
+  label.textContent = 'Copy sharing link'
+  const icon = document.createElement('span')
+  icon.className = 'fontawesome-paste'
+  icon.style = 'padding: 10px'
+
+  button.appendChild(label)
+  button.appendChild(icon)
+  return button
 }
 
 // #endregion gallery-view
@@ -515,7 +535,7 @@ function navToGallery() {
 // #region helpers
 
 function makeGatewayURL(cid, path) {
-  return `https://${cid}.ipfs.dweb.link/${path}`
+  return `https://${cid}.ipfs.dweb.link/${encodeURIComponent(path)}`
 }
 
 function jsonFile(filename, obj) {
@@ -548,6 +568,35 @@ function getLocationHash() {
 
 function setLocationHash(value) {
   location.hash = '#' + value
+}
+
+function copyStringToClipboard (str) {
+  // Create new element
+  var el = document.createElement('textarea');
+  // Set value (string to be copied)
+  el.value = str;
+  // Set non-editable to avoid focus and move outside of view
+  el.setAttribute('readonly', '');
+  el.style = {position: 'absolute', left: '-9999px'};
+  document.body.appendChild(el);
+  // Select text inside element
+  el.select();
+  // Copy text to clipboard
+  document.execCommand('copy');
+  // Remove temporary element
+  document.body.removeChild(el);
+
+  showPopupMessage('Copied image URL to clipboard')
+}
+
+function showPopupMessage(message) {
+  const snackbar = document.getElementById('snackbar')
+  if (!snackbar) {
+    return
+  }
+  snackbar.textContent = message
+  snackbar.classList.add('show')
+  setTimeout(() => snackbar.classList.remove('show'), 3000)
 }
 
 // #endregion helpers
