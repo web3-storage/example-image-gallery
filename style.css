@@ -285,12 +285,20 @@ label {
  * Settings page
  ************************************/
 
+#token-ui {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 #token-form {
   display: flex;
   flex-direction: column;
 }
 
-
+#about-message {
+  max-width: 500px;
+}
 
 
 /* The snackbar - position it at the bottom and in the middle of the screen */
