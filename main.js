@@ -5,12 +5,6 @@ import './style.css'
 import { Web3Storage } from 'web3.storage'
 import Glide from '@glidejs/glide'
 
-const uploadButton = document.getElementById('upload-button')
-const fileInput = document.getElementById('file-input')
-const dropArea = document.getElementById('drop-area')
-const captionInput = document.getElementById('caption-input')
-const output = document.getElementById('output')
-const tokenInput = document.getElementById('token-input')
 
 ////////////////////////////////
 ////// Image upload & listing
@@ -161,6 +155,9 @@ function setupUploadUI() {
   if (!document.getElementById('upload-ui')) {
     return
   }
+  const uploadButton = document.getElementById('upload-button')
+  const fileInput = document.getElementById('file-input')
+  const dropArea = document.getElementById('drop-area')
 
   showUploadInputs()
 
@@ -223,6 +220,7 @@ function fileDropped(evt) {
  * Side effects: sets preview image to file content and sets upload button state to enabled.
  */
 function handleFileSelected(file) {
+  const uploadButton = document.getElementById('upload-button')
   selectedFile = file
   if (file == null) {
     uploadButton.disabled = true
@@ -255,6 +253,7 @@ function uploadClicked(evt) {
   // switch to "upload in progress" view
   showInProgressUI()
 
+  const captionInput = document.getElementById('caption-input')
   const caption = captionInput.value || ''
   storeImage(selectedFile, caption)
     .then(showSuccessView)
@@ -312,6 +311,10 @@ function hideSuccessView() {
  * @param {string} text 
  */
  function showMessage(text) {
+  const output = document.getElementById('output')
+  if (!output) {
+    return
+  }
   const node = document.createElement('div')
   node.innerText = text
   output.appendChild(node)
@@ -322,6 +325,10 @@ function hideSuccessView() {
  * @param {string} url 
  */
 function showLink(url) {
+  const output = document.getElementById('output')
+  if (!output) {
+    return
+  }
   const node = document.createElement('a')
   node.href = url
   node.target = '_external'
@@ -503,6 +510,7 @@ function setupTokenUI() {
   }
 
   const tokenInputArea = document.getElementById('token-input-wrapper')
+  const tokenInput = document.getElementById('token-input')
   const tokenSpinner = document.getElementById('token-spinner')
 
   const changeHandler = evt => {
