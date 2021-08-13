@@ -384,8 +384,10 @@ async function setupGalleryUI() {
   })
 
   // after moving to a new slide, update the location hash with the matching CID
+  // and update the "image x of y" text
   glide.on('move.after', () => {
     setLocationHash(slideCIDs[glide.index])
+    updateImageCount(glide.index + 1, slideCIDs.length)
   })
 
   glide.mount()
@@ -455,6 +457,14 @@ function iconLabel(iconClass, labelText) {
   div.appendChild(icon)
   div.appendChild(label)
   return div
+}
+
+function updateImageCount(current, total) {
+  const div = document.getElementById('gallery-image-count')
+  if (!div) {
+    return
+  }
+  div.textContent = `Image ${current} of ${total}`
 }
 
 // #endregion gallery-view

@@ -240,11 +240,6 @@ label {
   padding: 10px;
 }
 
-.glide__arrow {
-  background-color: white;
-  color: #2c3e50;
-}
-
 .share-link {
   text-decoration: none;
 }
@@ -255,6 +250,21 @@ label {
   align-items: center;
   justify-content: center;
   height: 100%;
+}
+
+#carousel {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  flex-grow: 1;
+}
+
+.gallery-controls {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin: 30px;
 }
 
 /************************************
