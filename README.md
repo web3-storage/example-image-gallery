@@ -107,25 +107,20 @@ This example project is written in "vanilla" JavaScript, HTML and CSS, so there'
 
 The JavaScript code uses features from the ES2018 language standard, which is supported by all modern browsers (Internet Explorer [officially doesn't count](https://techcommunity.microsoft.com/t5/windows-it-pro-blog/internet-explorer-11-desktop-app-retirement-faq/ba-p/2366549)).
 
-There are three HTML pages:
+There are three HTML pages inside the `src` directory:
 
 - `index.html` has the image upload UI
 - `gallery.html` has a carousel that displays your uploaded images
 - `settings.html` has a box to paste your API token into (or delete it)
 
-All the pages import the `main.js` file as a [JavaScript module](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules), which contains the UI logic for each page, as well as the code that interacts with Web3.Storage.
+Each page has a corresponding JavaScript file that it imports a [JavaScript module](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules). 
+For example, `src/gallery.html` imports `src/js/gallery.js`.
 
-The main "entry point" is the `setup` function at the bottom of `main.js`, which calls the setup function for each of the UI sections (e.g. `setupUploadUI`, `setupGalleryUI`). Note that we always call these setup functions even if we're not on the page they correspond to, since they'll just return early if the DOM elements they expect aren't present on the page.
+There are also some helpers for DOM manipulation and other common needs in `src/js/helpers.js`, and the code for interacting with Web3.Storage in `src/js/storage.js`. Each page imports some code from these common files.
 
 ### Web3.Storage interactions
 
-Most of the code in `main.js` deals with setting up and managing the UI. The parts that are specific to Web3.Storage are all near the top of the file, in a section marked with this comment header:
-
-```javascript
-////////////////////////////////
-////// Image upload & listing
-////////////////////////////////
-```
+The code that's specific to Web3.Storage lives in [`src/js/storage.js](./src/js/storage.js).
 
 #### Uploading images
 
