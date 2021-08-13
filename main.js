@@ -459,6 +459,7 @@ function makeClipboardButton(url) {
   button.onclick = e => {
     e.preventDefault()
     copyStringToClipboard(url)
+    showPopupMessage('Copied image URL to clipboard')
   }
 
   const label = iconLabel('fontawesome-paste', 'Copy sharing link')
@@ -657,8 +658,6 @@ function copyStringToClipboard (str) {
   document.execCommand('copy');
   // Remove temporary element
   document.body.removeChild(el);
-
-  showPopupMessage('Copied image URL to clipboard')
 }
 
 function showPopupMessage(message) {
