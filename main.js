@@ -124,16 +124,28 @@ async function getImageMetadata(cid) {
   return { ...metadata, cid, gatewayURL, uri }
 }
 
+/**
+ * Checks if the given API token is valid by issuing a request.
+ * @param {string} token 
+ * @returns {Promise<boolean>} resolves to true if the token is valid, false if invalid.
+ */
 async function validateToken(token) {
   const web3storage = new Web3Storage({ token })
 
   try {
-    for await (const _ of web3storage.list({ maxResults: 1 })) {
-      return true
-    }
+    // try fetching status info for the CID for an empty IPFS directory
+    const testCID = 'bafybeiczsscdsbs7ffqz55asqdf3smv6klcw3gofszvwlyarci47bgf354'
+    await web3storage.status(testCID)
+    // any non-error response means the token is legit
+    return true
   } catch (e) {
-    console.log('invalid token', e)
-    return false
+    // only return false for auth-related errors
+    if (e.message.includes('401') || e.message.includes('403')) {
+      console.log('invalid token', e.message)
+      return false
+    }
+    // propagate non-auth errors
+    throw e
   }
 }
 
