@@ -242,6 +242,10 @@ function handleFileSelected(file) {
   uploadButton.disabled = false
 }
 
+/**
+ * Sets the src for any preview image elements to the content of the given image file.
+ * @param {File} imageFile 
+ */
 function updatePreviewImages(imageFile) {
   const elements = document.querySelectorAll('img.preview-image')
   const url = URL.createObjectURL(imageFile)
@@ -271,6 +275,9 @@ function uploadClicked(evt) {
     .then(showSuccessView)
 }
 
+/**
+ * Shows the image upload form and hides the in-progress and success views.
+ */
 function showUploadInputs() {
   const inputArea = document.getElementById('upload-input-area')
   showElement(inputArea)
@@ -279,14 +286,19 @@ function showUploadInputs() {
 }
 
 /**
- * Hides the file upload view and shows an "upload in progress" view.
+ * Shows an "upload in progress" view and hides the image upload form and success view.
  */
 function showInProgressUI() {
   const inProgress = document.getElementById('upload-in-progress')
   showElement(inProgress)
   hideUploadInputs()
+  hideSuccessView()
 }
 
+/**
+ * Shows a "yay! success" view for the given upload result.
+ * @param {object} uploadResult an object containing metdata about the uploaded file.
+ */
 function showSuccessView(uploadResult) {
   hideInProgressView()
 
@@ -303,16 +315,25 @@ function showSuccessView(uploadResult) {
   showElement(successView)
 }
 
+/**
+ * Hides the image upload form.
+ */
 function hideUploadInputs() {
   const inputArea = document.getElementById('upload-input-area')
   hideElement(inputArea)
 }
 
+/**
+ * Hides the upload-in-progress view.
+ */
 function hideInProgressView() {
   const inProgress = document.getElementById('upload-in-progress')
   hideElement(inProgress)
 }
 
+/**
+ * Hides the upload success view.
+ */
 function hideSuccessView() {
   const successView = document.getElementById('upload-success')
   hideElement(successView)
@@ -473,6 +494,12 @@ function makeShareLink(url) {
   return a
 }
 
+/**
+ * Makes a button that can be clicked to copy the given URL to the clipboard.
+ * Also shows a popup message to the user when clicked.
+ * @param {string} url 
+ * @returns {HTMLButtonElement}
+ */
 function makeClipboardButton(url) {
   const button = document.createElement('button')
   button.onclick = e => {
@@ -486,6 +513,12 @@ function makeClipboardButton(url) {
   return button
 }
 
+/**
+ * Makes a div containing an icon, followed by a text label
+ * @param {string} iconClass class for the icon, e.g. 'fontawesome-share'
+ * @param {string} labelText
+ * @returns {HTMLDivElement}
+ */
 function iconLabel(iconClass, labelText) {
   const label = document.createElement('span')
   label.textContent = labelText
@@ -601,22 +634,21 @@ function updateTokenUI() {
 
 // #region navigation
 
+/**
+ * Sets window location to the given path, if we're not already there.
+ * @param {string} path 
+ */
 function navToPath(path) {
   if (window.location.pathname !== path) {
     window.location.pathname = path
   }
 }
 
+/**
+ * Set window location to the settings page.
+ */
 function navToSettings() {
   navToPath('/settings.html')
-}
-
-function navToUpload() {
-  navToPath('/')
-}
-
-function navToGallery() {
-  navToPath('/gallery.html')
 }
 
 // #endregion navigation
@@ -627,42 +659,83 @@ function navToGallery() {
 
 // #region helpers
 
+/**
+ * Return an IPFS gateway URL for the given CID and path
+ * @param {string} cid 
+ * @param {string} path 
+ * @returns {string}
+ */
 function makeGatewayURL(cid, path) {
   return `https://${cid}.ipfs.dweb.link/${encodeURIComponent(path)}`
 }
 
+/**
+ * Make a File object with the given filename, containing the given object (serialized to JSON).
+ * @param {string} filename filename for the returned File object
+ * @param {object} obj a JSON-serializable object
+ * @returns {File}
+ */
 function jsonFile(filename, obj) {
   return new File([JSON.stringify(obj)], filename)
 }
 
+/**
+ * @returns {string|null} the saved API token
+ */
 function getSavedToken() {
   return localStorage.getItem('w3storage-token')
 }
 
+/**
+ * Saves the given token to local storage
+ * @param {string} token 
+ */
 function saveToken(token) {
   localStorage.setItem('w3storage-token', token)
 }
 
+/**
+ * Removes any saved token from local storage
+ */
 function deleteSavedToken() {
   localStorage.removeItem('w3storage-token')
 }
 
+/**
+ * Hides the given DOM element by applying a "hidden" class,
+ * which sets 'display: none'
+ * @param {HTMLElement} el 
+ */
 function hideElement(el) {
   el.classList.add('hidden')
 }
 
+/**
+ * Removes the 'hidden' class from the given DOM element.
+ * @param {HTMLElement} el 
+ */
 function showElement(el) {
   el.classList.remove('hidden')
 }
 
+/**
+ * @returns {string} location.hash, with the leading '#' removed
+ */
 function getLocationHash() {
   return location.hash.substring(1)
 }
 
+/**
+ * @param {string} value value you want to set location.hash to (without the leading '#')
+ */
 function setLocationHash(value) {
   location.hash = '#' + value
 }
 
+/**
+ * Copies the given string to the user's clipboard.
+ * @param {string} str 
+ */
 function copyStringToClipboard (str) {
   // Create new element
   var el = document.createElement('textarea');
@@ -680,6 +753,10 @@ function copyStringToClipboard (str) {
   document.body.removeChild(el);
 }
 
+/**
+ * Shows a message to the user in a small popup box that fades away after a few seconds.
+ * @param {string} message message to display
+ */
 function showPopupMessage(message) {
   const snackbar = document.getElementById('snackbar')
   if (!snackbar) {
