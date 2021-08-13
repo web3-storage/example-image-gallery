@@ -494,6 +494,7 @@ function setupTokenUI() {
       hideElement(tokenSpinner)
       if (!valid) {
         showPopupMessage('Invalid token!')
+        tokenInput.value = ''
         updateTokenUI()
         return
       }
@@ -509,9 +510,17 @@ function setupTokenUI() {
   if (tokenDeleteButton) {
     tokenDeleteButton.onclick = evt => {
       evt.preventDefault()
+      console.log('yo')
       deleteSavedToken()
       updateTokenUI()
     }
+  }
+  const tokenSaveButton = document.getElementById('token-save-button')
+  tokenSaveButton.onclick = evt => {
+    evt.preventDefault()
+    // the save button doesn't actually do anything, 
+    // since we already handle the token input in the text field's
+    // onchange handler, which will fire when you try to click the button :)
   }
 
   updateTokenUI()
