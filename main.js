@@ -287,6 +287,9 @@ function showSuccessView(uploadResult) {
   gatewayLink.href = uploadResult.imageGatewayURL
 
   const successView = document.getElementById('upload-success')
+  const copyButton = makeClipboardButton(uploadResult.imageGatewayURL)
+  successView.appendChild(copyButton)
+
   showElement(successView)
 }
 

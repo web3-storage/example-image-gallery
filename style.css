@@ -63,11 +63,10 @@ nav {
 
 a {
   color: var(--link-color);
-}
-
-nav a {
   text-decoration: none;
 }
+
+
 
 .nav-current-page {
   color: var(--curent-page-nav-highlight-color);
@@ -159,6 +158,12 @@ label {
 
 #upload-success.hidden {
   display: none;
+}
+
+#success-links {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
 }
 
 #output {
