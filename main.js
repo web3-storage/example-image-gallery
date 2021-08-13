@@ -452,7 +452,6 @@ function iconLabel(iconClass, labelText) {
   label.textContent = labelText
   const icon = document.createElement('span')
   icon.className = iconClass
-  icon.style = 'padding: 10px'
   const div = document.createElement('div')
   div.appendChild(icon)
   div.appendChild(label)

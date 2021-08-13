@@ -21,6 +21,7 @@
 /* fontawesome */
 [class*="fontawesome-"]:before {
   font-family: 'FontAwesome', sans-serif;
+  padding: 5px;
 }
 
 /* apply to hide an element, remove to show */
@@ -258,6 +259,10 @@ label {
   justify-content: flex-start;
   flex-grow: 1;
   cursor: default;
+}
+
+#carousel.hidden {
+  display: none;
 }
 
 .glide__track {
