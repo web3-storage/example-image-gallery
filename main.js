@@ -126,7 +126,6 @@ async function getImageMetadata(cid) {
   }
   const metadata = await res.json()
   const gatewayURL = makeGatewayURL(cid, metadata.path)
-  console.log('gateway url', gatewayURL)
   const uri = `ipfs://${cid}/${metadata.path}`
   return { ...metadata, cid, gatewayURL, uri }
 }
@@ -394,6 +393,23 @@ async function setupGalleryUI() {
   })
 
   glide.mount()
+
+  // update the slide if the location hash changes
+  // e.g. if the user preses the back button
+  window.onhashchange = () => {
+    const hash = getLocationHash()
+    console.log('hash change', hash)
+    // find the slide index for the CID
+    for (let idx = 0; idx < slideCIDs.length; idx++) {
+      if (slideCIDs[idx] === hash) {
+        // only move if we're not already on the right slide
+        if (glide.index !== idx) {
+          glide.go(`=${idx}`)
+        }
+        break
+      }
+    }
+  }
 }
 
 /**
@@ -522,7 +538,6 @@ function setupTokenUI() {
   if (tokenDeleteButton) {
     tokenDeleteButton.onclick = evt => {
       evt.preventDefault()
-      console.log('yo')
       deleteSavedToken()
       updateTokenUI()
     }
