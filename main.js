@@ -297,7 +297,7 @@ function showInProgressUI() {
 
 /**
  * Shows a "yay! success" view for the given upload result.
- * @param {object} uploadResult an object containing metdata about the uploaded file.
+ * @param {StoreImageResult} uploadResult an object containing metdata about the uploaded file.
  */
 function showSuccessView(uploadResult) {
   hideInProgressView()
