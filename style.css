@@ -257,6 +257,15 @@ label {
   flex-direction: column;
   justify-content: flex-start;
   flex-grow: 1;
+  cursor: default;
+}
+
+.glide__track {
+  cursor: grab;
+}
+
+.glide__track:active {
+  cursor: grabbing;
 }
 
 .gallery-controls {
