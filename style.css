@@ -226,6 +226,10 @@ label {
 #gallery-ui {
   color: #2c3e50;
   height: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
 }
 
 .gallery-image-card {
@@ -253,15 +257,17 @@ label {
 #carousel-wrapper {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  /* align-items: center; */
   justify-content: center;
   height: 100%;
+  max-width: 800px;
 }
 
 #carousel {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+  /* align-items: center; */
   flex-grow: 1;
   cursor: default;
 }
@@ -282,8 +288,13 @@ label {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: space-between;
+  justify-content: space-around;
+  max-width: 800px;
   margin: 30px;
+}
+
+#gallery-controls-wrapper {
+  display: flex;
 }
 
 /************************************
