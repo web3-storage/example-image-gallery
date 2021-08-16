@@ -4,6 +4,13 @@ This is an example of using [Web3.Storage](https://web3.storage) to create a sim
 
 ## Usage
 
+Clone this repository and enter the new directory:
+
+```shell
+git clone https://github.com/web3-storage/example-image-gallery
+cd example-image-gallery
+```
+
 Install dependencies:
 
 ```shell
@@ -49,8 +56,6 @@ dist
 ```
 
 The contents of the `dist` folder can be copied to any static web host, or even published to IPFS and Filecoin using Web3.Storage.
-
-<!-- TODO: write script to deploy to web3.storage & show how to use it -->
 
 To view the compiled site on your local computer, you'll need to run a basic web server - just opening the `.html` files in your browser won't work, since it will block the request to load the javascript files thanks to CORS policies.
 

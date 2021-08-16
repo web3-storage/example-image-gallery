@@ -5,13 +5,6 @@ import './style.css'
 import { Web3Storage } from 'web3.storage'
 import Glide from '@glidejs/glide'
 
-const previewImage = document.getElementById('image-preview')
-const uploadButton = document.getElementById('upload-button')
-const fileInput = document.getElementById('file-input')
-const dropArea = document.getElementById('drop-area')
-const captionInput = document.getElementById('caption-input')
-const output = document.getElementById('output')
-const tokenInput = document.getElementById('token-input')
 
 ////////////////////////////////
 ////// Image upload & listing
@@ -131,6 +124,31 @@ async function getImageMetadata(cid) {
   return { ...metadata, cid, gatewayURL, uri }
 }
 
+/**
+ * Checks if the given API token is valid by issuing a request.
+ * @param {string} token 
+ * @returns {Promise<boolean>} resolves to true if the token is valid, false if invalid.
+ */
+async function validateToken(token) {
+  const web3storage = new Web3Storage({ token })
+
+  try {
+    // try fetching status info for the CID for an empty IPFS directory
+    const testCID = 'bafybeiczsscdsbs7ffqz55asqdf3smv6klcw3gofszvwlyarci47bgf354'
+    await web3storage.status(testCID)
+    // any non-error response means the token is legit
+    return true
+  } catch (e) {
+    // only return false for auth-related errors
+    if (e.message.includes('401') || e.message.includes('403')) {
+      console.log('invalid token', e.message)
+      return false
+    }
+    // propagate non-auth errors
+    throw e
+  }
+}
+
 // #endregion web3storage-interactions
 
 ////////////////////////////////
@@ -149,6 +167,11 @@ function setupUploadUI() {
   if (!document.getElementById('upload-ui')) {
     return
   }
+  const uploadButton = document.getElementById('upload-button')
+  const fileInput = document.getElementById('file-input')
+  const dropArea = document.getElementById('drop-area')
+
+  showUploadInputs()
 
   // handle file selection changes
   fileInput.onchange = fileSelected
@@ -209,6 +232,7 @@ function fileDropped(evt) {
  * Side effects: sets preview image to file content and sets upload button state to enabled.
  */
 function handleFileSelected(file) {
+  const uploadButton = document.getElementById('upload-button')
   selectedFile = file
   if (file == null) {
     uploadButton.disabled = true
@@ -218,6 +242,10 @@ function handleFileSelected(file) {
   uploadButton.disabled = false
 }
 
+/**
+ * Sets the src for any preview image elements to the content of the given image file.
+ * @param {File} imageFile 
+ */
 function updatePreviewImages(imageFile) {
   const elements = document.querySelectorAll('img.preview-image')
   const url = URL.createObjectURL(imageFile)
@@ -241,26 +269,74 @@ function uploadClicked(evt) {
   // switch to "upload in progress" view
   showInProgressUI()
 
+  const captionInput = document.getElementById('caption-input')
   const caption = captionInput.value || ''
-  storeImage(selectedFile, caption).then(({ cid, imageGatewayURL, imageURI, metadataGatewayURL, metadataURI }) => {
-    // TODO: do something with the cid (generate sharing link, etc)
-    showMessage(`stored image with cid: ${cid}`)
-    showMessage(`ipfs image uri: ${imageURI}`)
-    showLink(metadataGatewayURL)
-    showMessage(`ipfs metadata uri: ${metadataURI}`)
-    showLink(imageGatewayURL)
-  })
+  storeImage(selectedFile, caption)
+    .then(showSuccessView)
 }
 
 /**
- * Hides the file upload view and shows an "upload in progress" view.
+ * Shows the image upload form and hides the in-progress and success views.
+ */
+function showUploadInputs() {
+  const inputArea = document.getElementById('upload-input-area')
+  showElement(inputArea)
+  hideInProgressView()
+  hideSuccessView()
+}
+
+/**
+ * Shows an "upload in progress" view and hides the image upload form and success view.
  */
 function showInProgressUI() {
-  const container = document.getElementById('upload-in-progress')
-  showElement(container)
+  const inProgress = document.getElementById('upload-in-progress')
+  showElement(inProgress)
+  hideUploadInputs()
+  hideSuccessView()
+}
 
-  // hide the file upload UI
-  hideElement(dropArea)
+/**
+ * Shows a "yay! success" view for the given upload result.
+ * @param {StoreImageResult} uploadResult an object containing metdata about the uploaded file.
+ */
+function showSuccessView(uploadResult) {
+  hideInProgressView()
+
+  const galleryLink = document.getElementById('success-gallery-link')
+  galleryLink.href = `./gallery.html#${uploadResult.cid}`
+
+  const gatewayLink = document.getElementById('success-gateway-link')
+  gatewayLink.href = uploadResult.imageGatewayURL
+
+  const successView = document.getElementById('upload-success')
+  const copyButton = makeClipboardButton(uploadResult.imageGatewayURL)
+  successView.appendChild(copyButton)
+
+  showElement(successView)
+}
+
+/**
+ * Hides the image upload form.
+ */
+function hideUploadInputs() {
+  const inputArea = document.getElementById('upload-input-area')
+  hideElement(inputArea)
+}
+
+/**
+ * Hides the upload-in-progress view.
+ */
+function hideInProgressView() {
+  const inProgress = document.getElementById('upload-in-progress')
+  hideElement(inProgress)
+}
+
+/**
+ * Hides the upload success view.
+ */
+function hideSuccessView() {
+  const successView = document.getElementById('upload-success')
+  hideElement(successView)
 }
 
 /**
@@ -268,6 +344,10 @@ function showInProgressUI() {
  * @param {string} text 
  */
  function showMessage(text) {
+  const output = document.getElementById('output')
+  if (!output) {
+    return
+  }
   const node = document.createElement('div')
   node.innerText = text
   output.appendChild(node)
@@ -278,8 +358,13 @@ function showInProgressUI() {
  * @param {string} url 
  */
 function showLink(url) {
+  const output = document.getElementById('output')
+  if (!output) {
+    return
+  }
   const node = document.createElement('a')
   node.href = url
+  node.target = '_external'
   node.innerText = `> 🔗 ${url}`
   output.appendChild(node)
 }
@@ -303,32 +388,68 @@ async function setupGalleryUI() {
     return
   }
 
-  let numImages = 0
+  const slideCIDs = []
+  let selectedSlide = 0
+  let i = 0
   for await (const image of listImageMetadata()) {
+    slideCIDs[i] = image.cid
     const img = makeImageCard(image)
     const li = document.createElement('li')
     li.className = 'glide__slide'
     li.appendChild(img)
     slideContainer.appendChild(li)
 
-    // show the carousel UI when we get the first image
-    if (numImages == 0) {
-      showElement(carousel)
-      hideElement(spinner)
+    // if we have a location hash that matches this image's CID, start the carousel here
+    if (image.cid === getLocationHash()) {
+      selectedSlide = i
     }
-    numImages += 1
+
+    i += 1
   }
 
-  console.log(`loaded metadata for ${numImages} images`)
+  console.log(`loaded metadata for ${i} images`)
   // If we don't have any images, show a message telling the user to upload something
-  if (numImages == 0) {
+  if (i == 0) {
     hideElement(spinner)
     const noContentMessage = document.getElementById('no-content-message')
     showElement(noContentMessage)
+  } else {
+    showElement(carousel)
+    hideElement(spinner)
   }
 
-  // activate the carousel
-  new Glide('.glide').mount()
+  // make the carousel component
+  const glide = new Glide('.glide', {
+    type: 'carousel',
+    gap: 800,
+    startAt: selectedSlide,
+  })
+
+  // after moving to a new slide, update the location hash with the matching CID
+  // and update the "image x of y" text
+  glide.on('move.after', () => {
+    setLocationHash(slideCIDs[glide.index])
+    updateImageCount(glide.index + 1, slideCIDs.length)
+  })
+
+  glide.mount()
+
+  // update the slide if the location hash changes
+  // e.g. if the user preses the back button
+  window.onhashchange = () => {
+    const hash = getLocationHash()
+    console.log('hash change', hash)
+    // find the slide index for the CID
+    for (let idx = 0; idx < slideCIDs.length; idx++) {
+      if (slideCIDs[idx] === hash) {
+        // only move if we're not already on the right slide
+        if (glide.index !== idx) {
+          glide.go(`=${idx}`)
+        }
+        break
+      }
+    }
+  }
 }
 
 /**
@@ -349,9 +470,11 @@ function makeImageCard(metadata) {
   label.textContent = metadata.caption
 
   const shareLink = makeShareLink(metadata.gatewayURL)
+  const copyButton = makeClipboardButton(metadata.gatewayURL)
   wrapper.appendChild(imgEl)
   wrapper.appendChild(label)
   wrapper.appendChild(shareLink)
+  wrapper.appendChild(copyButton)
   return wrapper
 }
 
@@ -362,18 +485,57 @@ function makeImageCard(metadata) {
  */
 function makeShareLink(url) {
   const a = document.createElement('a')
+  a.target = '_external'
   a.className = 'share-link'
   a.href = url
   
-  const label = document.createElement('span')
-  label.textContent = 'View on IPFS'
-  const icon = document.createElement('span')
-  icon.className = 'fontawesome-share'
-  icon.style = 'padding: 10px'
-
+  const label = iconLabel('fontawesome-share', 'View on IPFS')
   a.appendChild(label)
-  a.appendChild(icon)
   return a
+}
+
+/**
+ * Makes a button that can be clicked to copy the given URL to the clipboard.
+ * Also shows a popup message to the user when clicked.
+ * @param {string} url 
+ * @returns {HTMLButtonElement}
+ */
+function makeClipboardButton(url) {
+  const button = document.createElement('button')
+  button.onclick = e => {
+    e.preventDefault()
+    copyStringToClipboard(url)
+    showPopupMessage('Copied image URL to clipboard')
+  }
+
+  const label = iconLabel('fontawesome-paste', 'Copy sharing link')
+  button.appendChild(label)
+  return button
+}
+
+/**
+ * Makes a div containing an icon, followed by a text label
+ * @param {string} iconClass class for the icon, e.g. 'fontawesome-share'
+ * @param {string} labelText
+ * @returns {HTMLDivElement}
+ */
+function iconLabel(iconClass, labelText) {
+  const label = document.createElement('span')
+  label.textContent = labelText
+  const icon = document.createElement('span')
+  icon.className = iconClass
+  const div = document.createElement('div')
+  div.appendChild(icon)
+  div.appendChild(label)
+  return div
+}
+
+function updateImageCount(current, total) {
+  const div = document.getElementById('gallery-image-count')
+  if (!div) {
+    return
+  }
+  div.textContent = `Image ${current} of ${total}`
 }
 
 // #endregion gallery-view
@@ -387,19 +549,44 @@ function makeShareLink(url) {
 /**
  * DOM initialization for token management UI.
  */
-function setupTokenUI() {
+function setupTokenUI() {  
   if (!document.getElementById('token-ui')) {
     return
   }
 
-  tokenInput.onchange = evt => {
-    const token = evt.target.value
+  const tokenInputArea = document.getElementById('token-input-wrapper')
+  const tokenInput = document.getElementById('token-input')
+  const tokenSpinner = document.getElementById('token-spinner')
+
+  const changeHandler = evt => {
+    let token
+    if (evt.type === 'paste' && evt.clipboardData) {
+      token = evt.clipboardData.getData('Text')
+    } else {
+      token = evt.target.value
+    }
     if (!token) {
       return
     }
-    saveToken(token)
-    updateTokenUI()
+
+    hideElement(tokenInputArea)
+    showElement(tokenSpinner)
+
+    validateToken(token).then(valid => {
+      hideElement(tokenSpinner)
+      if (!valid) {
+        showPopupMessage('Invalid token!')
+        tokenInput.value = ''
+        updateTokenUI()
+        return
+      }
+      saveToken(token)
+      updateTokenUI()
+    })
   }
+
+  tokenInput.onchange = changeHandler
+  tokenInput.onpaste = changeHandler
 
   const tokenDeleteButton = document.getElementById('token-delete-button')
   if (tokenDeleteButton) {
@@ -408,6 +595,13 @@ function setupTokenUI() {
       deleteSavedToken()
       updateTokenUI()
     }
+  }
+  const tokenSaveButton = document.getElementById('token-save-button')
+  tokenSaveButton.onclick = evt => {
+    evt.preventDefault()
+    // the save button doesn't actually do anything, 
+    // since we already handle the token input in the text field's
+    // onchange handler, which will fire when you try to click the button :)
   }
 
   updateTokenUI()
@@ -440,22 +634,21 @@ function updateTokenUI() {
 
 // #region navigation
 
+/**
+ * Sets window location to the given path, if we're not already there.
+ * @param {string} path 
+ */
 function navToPath(path) {
   if (window.location.pathname !== path) {
     window.location.pathname = path
   }
 }
 
+/**
+ * Set window location to the settings page.
+ */
 function navToSettings() {
   navToPath('/settings.html')
-}
-
-function navToUpload() {
-  navToPath('/')
-}
-
-function navToGallery() {
-  navToPath('/gallery.html')
 }
 
 // #endregion navigation
@@ -466,32 +659,112 @@ function navToGallery() {
 
 // #region helpers
 
+/**
+ * Return an IPFS gateway URL for the given CID and path
+ * @param {string} cid 
+ * @param {string} path 
+ * @returns {string}
+ */
 function makeGatewayURL(cid, path) {
-  return `https://${cid}.ipfs.dweb.link/${path}`
+  return `https://${cid}.ipfs.dweb.link/${encodeURIComponent(path)}`
 }
 
+/**
+ * Make a File object with the given filename, containing the given object (serialized to JSON).
+ * @param {string} filename filename for the returned File object
+ * @param {object} obj a JSON-serializable object
+ * @returns {File}
+ */
 function jsonFile(filename, obj) {
   return new File([JSON.stringify(obj)], filename)
 }
 
+/**
+ * @returns {string|null} the saved API token
+ */
 function getSavedToken() {
   return localStorage.getItem('w3storage-token')
 }
 
+/**
+ * Saves the given token to local storage
+ * @param {string} token 
+ */
 function saveToken(token) {
   localStorage.setItem('w3storage-token', token)
 }
 
+/**
+ * Removes any saved token from local storage
+ */
 function deleteSavedToken() {
   localStorage.removeItem('w3storage-token')
 }
 
+/**
+ * Hides the given DOM element by applying a "hidden" class,
+ * which sets 'display: none'
+ * @param {HTMLElement} el 
+ */
 function hideElement(el) {
   el.classList.add('hidden')
 }
 
+/**
+ * Removes the 'hidden' class from the given DOM element.
+ * @param {HTMLElement} el 
+ */
 function showElement(el) {
   el.classList.remove('hidden')
+}
+
+/**
+ * @returns {string} location.hash, with the leading '#' removed
+ */
+function getLocationHash() {
+  return location.hash.substring(1)
+}
+
+/**
+ * @param {string} value value you want to set location.hash to (without the leading '#')
+ */
+function setLocationHash(value) {
+  location.hash = '#' + value
+}
+
+/**
+ * Copies the given string to the user's clipboard.
+ * @param {string} str 
+ */
+function copyStringToClipboard (str) {
+  // Create new element
+  var el = document.createElement('textarea');
+  // Set value (string to be copied)
+  el.value = str;
+  // Set non-editable to avoid focus and move outside of view
+  el.setAttribute('readonly', '');
+  el.style = {position: 'absolute', left: '-9999px'};
+  document.body.appendChild(el);
+  // Select text inside element
+  el.select();
+  // Copy text to clipboard
+  document.execCommand('copy');
+  // Remove temporary element
+  document.body.removeChild(el);
+}
+
+/**
+ * Shows a message to the user in a small popup box that fades away after a few seconds.
+ * @param {string} message message to display
+ */
+function showPopupMessage(message) {
+  const snackbar = document.getElementById('snackbar')
+  if (!snackbar) {
+    return
+  }
+  snackbar.textContent = message
+  snackbar.classList.add('show')
+  setTimeout(() => snackbar.classList.remove('show'), 3000)
 }
 
 // #endregion helpers
