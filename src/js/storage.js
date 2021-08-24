@@ -6,7 +6,7 @@ import { showMessage, showLink, jsonFile, getSavedToken, makeGatewayURL } from '
 ////// Image upload & listing
 ////////////////////////////////
 
-// #region web3storage-interactions
+// #region storeImage
 
 // We use this to identify our uploads in the client.list response.
 const namePrefix = 'ImageGallery'
@@ -66,7 +66,9 @@ export async function storeImage(imageFile, caption) {
   return { cid, metadataGatewayURL, imageGatewayURL, imageURI, metadataURI }
 }
 
+//#endregion storeImage
 
+//#region listImageMetadata
 /**
  * Get metadata objects for each image stored in the gallery.
  * 
@@ -94,7 +96,9 @@ export async function* listImageMetadata() {
     }
   }
 }
+//#endregion listImageMetadata
 
+//#region getImageMetadata
 /**
  * Fetches the metadata JSON from an image upload.
  * @param {string} cid the CID for the IPFS directory containing the metadata & image
@@ -119,7 +123,9 @@ export async function getImageMetadata(cid) {
   const uri = `ipfs://${cid}/${metadata.path}`
   return { ...metadata, cid, gatewayURL, uri }
 }
+//#endregion getImageMetadata
 
+//#region validateToken
 /**
  * Checks if the given API token is valid by issuing a request.
  * @param {string} token 
@@ -145,5 +151,4 @@ export async function validateToken(token) {
     throw e
   }
 }
-
-// #endregion web3storage-interactions
+// #endregion validateToken
